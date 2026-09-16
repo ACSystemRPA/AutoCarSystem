@@ -1,0 +1,285 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Editar OS #' ~ os.numero if os else 'Nova Ordem de Serviço' }}{% endblock %}
+{% block header_title %}{{ 'Editar OS #' ~ os.numero if os else 'Abertura de Ordem de Serviço' }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6">
+    <!-- Breadcrumb / Voltar -->
+    <div class="flex items-center justify-between">
+        <a href="{{ url_for('os.detalhes', id=os.id) if os else url_for('os.index') }}" class="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-white transition-colors">
+            <i class="fa-solid fa-arrow-left text-xs"></i>
+            <span>{{ 'Voltar para os detalhes' if os else 'Voltar para a lista' }}</span>
+        </a>
+        {% if os %}
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold {{ os.status_badge_class }}">
+                Status atual: {{ os.status }}
+            </span>
+        {% endif %}
+    </div>
+
+    <!-- Form Container -->
+    <form method="POST" action="" class="space-y-6">
+        <!-- Card 1: Identificação do Cliente e Veículo -->
+        <div class="glass-panel p-6 sm:p-8 rounded-2xl space-y-6">
+            <div class="flex items-center gap-3 border-b border-slate-800 pb-4">
+                <div class="w-8 h-8 rounded-lg bg-brand-500/20 text-brand-400 flex items-center justify-center font-bold text-sm">
+                    1
+                </div>
+                <div>
+                    <h3 class="text-base font-semibold text-slate-100">Cliente e Veículo</h3>
+                    <p class="text-xs text-slate-400">Identifique o proprietário e o automóvel em atendimento.</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <!-- Cliente -->
+                <div>
+                    <label for="cliente_id" class="block text-xs font-semibold text-slate-300 mb-1.5">
+                        Cliente <span class="text-rose-400">*</span>
+                    </label>
+                    <select id="cliente_id" name="cliente_id" required
+                            class="w-full px-4 py-2.5 bg-slate-900/80 border border-slate-700/80 rounded-xl text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all">
+                        <option value="">Selecione um cliente...</option>
+                        {% for c in clientes %}
+                            <option value="{{ c.id }}" {% if (os and os.cliente_id == c.id) or (request.args.get('cliente_id')|int == c.id) %}selected{% endif %}>
+                                {{ c.nome }} ({{ c.cpf_cnpj or 'Sem doc' }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Veículo (atualizado dinamicamente via JS ou pré-selecionado) -->
+                <div>
+                    <label for="veiculo_id" class="block text-xs font-semibold text-slate-300 mb-1.5">
+                        Veículo <span class="text-rose-400">*</span>
+                    </label>
+                    <select id="veiculo_id" name="veiculo_id" required
+                            class="w-full px-4 py-2.5 bg-slate-900/80 border border-slate-700/80 rounded-xl text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all">
+                        <option value="">Selecione o veículo...</option>
+                        {% for v in veiculos %}
+                            <option value="{{ v.id }}" {% if (os and os.veiculo_id == v.id) or (request.args.get('veiculo_id')|int == v.id) %}selected{% endif %}>
+                                {{ v.placa }} - {{ v.marca }} {{ v.modelo }} ({{ v.ano_modelo or v.ano_fabricacao }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- KM Atual -->
+                <div>
+                    <label for="km_atual" class="block text-xs font-semibold text-slate-300 mb-1.5">
+                        Quilometragem (KM)
+                    </label>
+                    <input type="number" id="km_atual" name="km_atual" value="{{ os.km_atual if os and os.km_atual is not none else '' }}" placeholder="Ex: 85400"
+                           class="w-full px-4 py-2.5 bg-slate-900/80 border border-slate-700/80 rounded-xl text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all">
+                </div>
+
+                <!-- Nível do Tanque / Combustível -->
+                <div>
+                    <label for="combustivel_nivel" class="block text-xs font-semibold text-slate-300 mb-1.5">
+                        Nível de Combustível
+                    </label>
+                    <select id="combustivel_nivel" name="combustivel_nivel"
+                            class="w-full px-4 py-2.5 bg-slate-900/80 border border-slate-700/80 rounded-xl text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all">
+                        <option value="">Não informado</option>
+                        <option value="Reserva" {% if os and os.combustivel_nivel == 'Reserva' %}selected{% endif %}>Reserva</option>
+                        <option value="1/4" {% if os and os.combustivel_nivel == '1/4' %}selected{% endif %}>1/4</option>
+                        <option value="1/2" {% if os and os.combustivel_nivel == '1/2' %}selected{% endif %}>1/2 (Meio Tanque)</option>
+                        <option value="3/4" {% if os and os.combustivel_nivel == '3/4' %}selected{% endif %}>3/4</option>
+                        <option value="Cheio" {% if os and os.combustivel_nivel == 'Cheio' %}selected{% endif %}>Cheio (1/1)</option>
+                    </select>
+                </div>
+
+                <!-- Previsão de Entrega -->
+                <div>
+                    <label for="data_previsao" class="block text-xs font-semibold text-slate-300 mb-1.5">
+                        Previsão de Conclusão / Entrega
+                    </label>
+                    <input type="date" id="data_previsao" name="data_previsao" value="{{ os.data_previsao.strftime('%Y-%m-%d') if os and os.data_previsao else '' }}"
+                           class="w-full px-4 py-2.5 bg-slate-900/80 border border-slate-700/80 rounded-xl text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all">
+                </div>
+
+                <!-- Status (se editando) -->
+                {% if os %}
+                <div>
+                    <label for="status" class="block text-xs font-semibold text-slate-300 mb-1.5">
+                        Status da OS
+                    </label>
+                    <select id="status" name="status"
+                            class="w-full px-4 py-2.5 bg-slate-900/80 border border-slate-700/80 rounded-xl text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all">
+                        <option value="ABERTA" {% if os.status == 'ABERTA' %}selected{% endif %}>Aberta</option>
+                        <option value="ORCAMENTO" {% if os.status == 'ORCAMENTO' %}selected{% endif %}>Orçamento</option>
+                        <option value="APROVADA" {% if os.status == 'APROVADA' %}selected{% endif %}>Aprovada</option>
+                        <option value="EM_ANDAMENTO" {% if os.status == 'EM_ANDAMENTO' %}selected{% endif %}>Em Andamento</option>
+                        <option value="AGUARDANDO_PECAS" {% if os.status == 'AGUARDANDO_PECAS' %}selected{% endif %}>Aguardando Peças</option>
+                        <option value="CONCLUIDA" {% if os.status == 'CONCLUIDA' %}selected{% endif %}>Concluída (Baixa Estoque)</option>
+                        <option value="ENTREGUE" {% if os.status == 'ENTREGUE' %}selected{% endif %}>Entregue</option>
+                        <option value="CANCELADA" {% if os.status == 'CANCELADA' %}selected{% endif %}>Cancelada</option>
+                    </select>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Card 2: Relato, Diagnóstico e Avarias -->
+        <div class="glass-panel p-6 sm:p-8 rounded-2xl space-y-6">
+            <div class="flex items-center gap-3 border-b border-slate-800 pb-4">
+                <div class="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold text-sm">
+                    2
+                </div>
+                <div>
+                    <h3 class="text-base font-semibold text-slate-100">Descrição do Problema & Diagnóstico</h3>
+                    <p class="text-xs text-slate-400">Reclamação do condutor e apontamentos técnicos iniciais.</p>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <!-- Relato do Cliente -->
+                <div>
+                    <label for="defeito_reclamado" class="block text-xs font-semibold text-slate-300 mb-1.5">
+                        Defeito Reclamado / Solicitação do Cliente <span class="text-rose-400">*</span>
+                    </label>
+                    <textarea id="defeito_reclamado" name="defeito_reclamado" rows="3" required placeholder="Descreva os sintomas informados pelo cliente (ex: barulho na suspensão dianteira ao passar em lombadas, luz da injeção acesa...)"
+                              class="w-full px-4 py-2.5 bg-slate-900/80 border border-slate-700/80 rounded-xl text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all">{{ os.defeito_reclamado if os else '' }}</textarea>
+                </div>
+
+                <!-- Diagnóstico / Parecer Técnico -->
+                <div>
+                    <label for="diagnostico" class="block text-xs font-semibold text-slate-300 mb-1.5">
+                        Diagnóstico Técnico / Análise Inicial
+                    </label>
+                    <textarea id="diagnostico" name="diagnostico" rows="3" placeholder="Apontamento do mecânico após vistoria (ex: folga nos pivôs e buchas da bandeja, necessidade de troca das pastilhas de freio...)"
+                              class="w-full px-4 py-2.5 bg-slate-900/80 border border-slate-700/80 rounded-xl text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all">{{ os.diagnostico if os and os.diagnostico else '' }}</textarea>
+                </div>
+
+                <!-- Observações Gerais -->
+                <div>
+                    <label for="observacoes" class="block text-xs font-semibold text-slate-300 mb-1.5">
+                        Observações Internas
+                    </label>
+                    <textarea id="observacoes" name="observacoes" rows="2" placeholder="Informações adicionais para a equipe da oficina..."
+                              class="w-full px-4 py-2.5 bg-slate-900/80 border border-slate-700/80 rounded-xl text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all">{{ os.observacoes if os and os.observacoes else '' }}</textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 3: Checklist de Entrada & Vistoria -->
+        <div class="glass-panel p-6 sm:p-8 rounded-2xl space-y-6">
+            <div class="flex items-center gap-3 border-b border-slate-800 pb-4">
+                <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-sm">
+                    3
+                </div>
+                <div>
+                    <h3 class="text-base font-semibold text-slate-100">Checklist de Entrada</h3>
+                    <p class="text-xs text-slate-400">Inspeção de segurança e estado dos pertences do veículo.</p>
+                </div>
+            </div>
+
+            <!-- Grid de Itens do Checklist -->
+            {% set chk = os.checklist_dict if os else {} %}
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                <label class="flex items-center gap-3 p-3 bg-slate-900/60 border border-slate-800 rounded-xl cursor-pointer hover:bg-slate-800/40 transition-colors">
+                    <input type="checkbox" name="chk_estepe" {% if chk.get('estepe') %}checked{% endif %} class="w-4 h-4 rounded text-brand-500 bg-slate-800 border-slate-700 focus:ring-brand-500">
+                    <span class="text-xs font-medium text-slate-200">Estepe</span>
+                </label>
+
+                <label class="flex items-center gap-3 p-3 bg-slate-900/60 border border-slate-800 rounded-xl cursor-pointer hover:bg-slate-800/40 transition-colors">
+                    <input type="checkbox" name="chk_macaco" {% if chk.get('macaco') %}checked{% endif %} class="w-4 h-4 rounded text-brand-500 bg-slate-800 border-slate-700 focus:ring-brand-500">
+                    <span class="text-xs font-medium text-slate-200">Macaco</span>
+                </label>
+
+                <label class="flex items-center gap-3 p-3 bg-slate-900/60 border border-slate-800 rounded-xl cursor-pointer hover:bg-slate-800/40 transition-colors">
+                    <input type="checkbox" name="chk_chave_roda" {% if chk.get('chave_roda') %}checked{% endif %} class="w-4 h-4 rounded text-brand-500 bg-slate-800 border-slate-700 focus:ring-brand-500">
+                    <span class="text-xs font-medium text-slate-200">Chave de Roda</span>
+                </label>
+
+                <label class="flex items-center gap-3 p-3 bg-slate-900/60 border border-slate-800 rounded-xl cursor-pointer hover:bg-slate-800/40 transition-colors">
+                    <input type="checkbox" name="chk_triangulo" {% if chk.get('triangulo') %}checked{% endif %} class="w-4 h-4 rounded text-brand-500 bg-slate-800 border-slate-700 focus:ring-brand-500">
+                    <span class="text-xs font-medium text-slate-200">Triângulo</span>
+                </label>
+
+                <label class="flex items-center gap-3 p-3 bg-slate-900/60 border border-slate-800 rounded-xl cursor-pointer hover:bg-slate-800/40 transition-colors">
+                    <input type="checkbox" name="chk_documento" {% if chk.get('documento') %}checked{% endif %} class="w-4 h-4 rounded text-brand-500 bg-slate-800 border-slate-700 focus:ring-brand-500">
+                    <span class="text-xs font-medium text-slate-200">Documento no Carro</span>
+                </label>
+
+                <label class="flex items-center gap-3 p-3 bg-slate-900/60 border border-slate-800 rounded-xl cursor-pointer hover:bg-slate-800/40 transition-colors">
+                    <input type="checkbox" name="chk_som" {% if chk.get('som') %}checked{% endif %} class="w-4 h-4 rounded text-brand-500 bg-slate-800 border-slate-700 focus:ring-brand-500">
+                    <span class="text-xs font-medium text-slate-200">Aparelho de Som</span>
+                </label>
+            </div>
+
+            <!-- Detalhamento de Pertences e Avarias -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                <div>
+                    <label for="chk_pertences" class="block text-xs font-semibold text-slate-300 mb-1.5">
+                        Objetos de Valor / Pertences Deixados
+                    </label>
+                    <input type="text" id="chk_pertences" name="chk_pertences" value="{{ chk.get('pertences_descricao', '') }}" placeholder="Ex: Óculos de sol no porta-luvas, pen drive..."
+                           class="w-full px-4 py-2.5 bg-slate-900/80 border border-slate-700/80 rounded-xl text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all">
+                </div>
+
+                <div>
+                    <label for="chk_avarias" class="block text-xs font-semibold text-slate-300 mb-1.5">
+                        Avarias / Riscos Visíveis na Carroceria
+                    </label>
+                    <input type="text" id="chk_avarias" name="chk_avarias" value="{{ chk.get('avarias_descricao', '') }}" placeholder="Ex: Para-choque dianteiro direito ralado, risco na porta traseira..."
+                           class="w-full px-4 py-2.5 bg-slate-900/80 border border-slate-700/80 rounded-xl text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all">
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit Buttons -->
+        <div class="flex items-center justify-end gap-3 pt-2">
+            <a href="{{ url_for('os.detalhes', id=os.id) if os else url_for('os.index') }}"
+               class="px-6 py-2.5 rounded-xl border border-slate-700 hover:bg-slate-800 text-slate-300 text-sm font-semibold transition-all">
+                Cancelar
+            </a>
+            <button type="submit"
+                    class="px-6 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-sm font-semibold shadow-lg shadow-brand-600/30 transition-all active:scale-[0.98]">
+                {{ 'Salvar Alterações' if os else 'Abrir Ordem de Serviço' }}
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Script para carregar veículos do cliente dinamicamente -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const clienteSelect = document.getElementById('cliente_id');
+    const veiculoSelect = document.getElementById('veiculo_id');
+
+    if (clienteSelect && veiculoSelect) {
+        clienteSelect.addEventListener('change', async () => {
+            const clienteId = clienteSelect.value;
+            veiculoSelect.innerHTML = '<option value="">Carregando veículos...</option>';
+
+            if (!clienteId) {
+                veiculoSelect.innerHTML = '<option value="">Selecione o cliente primeiro...</option>';
+                return;
+            }
+
+            try {
+                const response = await fetch(`/os/api/veiculos-cliente/${clienteId}`);
+                const veiculos = await response.json();
+
+                if (veiculos.length === 0) {
+                    veiculoSelect.innerHTML = '<option value="">Nenhum veículo cadastrado para este cliente</option>';
+                } else {
+                    veiculoSelect.innerHTML = '<option value="">Selecione o veículo...</option>';
+                    veiculos.forEach(v => {
+                        const opt = document.createElement('option');
+                        opt.value = v.id;
+                        opt.textContent = `${v.placa} - ${v.marca} ${v.modelo} (${v.ano_modelo || ''})`;
+                        veiculoSelect.appendChild(opt);
+                    });
+                }
+            } catch (err) {
+                console.error('Erro ao carregar veículos:', err);
+                veiculoSelect.innerHTML = '<option value="">Erro ao buscar veículos</option>';
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

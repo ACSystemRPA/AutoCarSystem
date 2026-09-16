@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+
+{% block title %}Ordens de Serviço{% endblock %}
+{% block header_title %}Ordens de Serviço{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Resumo Rápido / Status Cards -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        <a href="{{ url_for('os.index') }}" class="glass-panel p-3.5 rounded-xl border border-slate-800 hover:border-slate-700 transition-all group">
+            <div class="text-[11px] font-medium text-slate-400">Total Geral</div>
+            <div class="text-xl font-bold text-slate-100 mt-1">{{ ordens|length if not status_filtro and not busca else '—' }}</div>
+        </a>
+        <a href="{{ url_for('os.index', status='ABERTA') }}" class="glass-panel p-3.5 rounded-xl border border-slate-800 hover:border-sky-500/40 transition-all group">
+            <div class="text-[11px] font-medium text-sky-400 flex items-center gap-1.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-sky-400"></span> Abertas
+            </div>
+            <div class="text-xs text-slate-400 mt-1">Aguardando análise</div>
+        </a>
+        <a href="{{ url_for('os.index', status='EM_ANDAMENTO') }}" class="glass-panel p-3.5 rounded-xl border border-slate-800 hover:border-amber-500/40 transition-all group">
+            <div class="text-[11px] font-medium text-amber-400 flex items-center gap-1.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> Em Execução
+            </div>
+            <div class="text-xs text-slate-400 mt-1">Serviço na pista</div>
+        </a>
+        <a href="{{ url_for('os.index', status='AGUARDANDO_PECAS') }}" class="glass-panel p-3.5 rounded-xl border border-slate-800 hover:border-orange-500/40 transition-all group">
+            <div class="text-[11px] font-medium text-orange-400 flex items-center gap-1.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-orange-400"></span> Peças
+            </div>
+            <div class="text-xs text-slate-400 mt-1">Aguardando estoque</div>
+        </a>
+        <a href="{{ url_for('os.index', status='CONCLUIDA') }}" class="glass-panel p-3.5 rounded-xl border border-slate-800 hover:border-emerald-500/40 transition-all group">
+            <div class="text-[11px] font-medium text-emerald-400 flex items-center gap-1.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Concluídas
+            </div>
+            <div class="text-xs text-slate-400 mt-1">Prontas p/ entrega</div>
+        </a>
+        <a href="{{ url_for('os.index', status='ENTREGUE') }}" class="glass-panel p-3.5 rounded-xl border border-slate-800 hover:border-indigo-500/40 transition-all group">
+            <div class="text-[11px] font-medium text-indigo-400 flex items-center gap-1.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span> Entregues
+            </div>
+            <div class="text-xs text-slate-400 mt-1">Finalizadas</div>
+        </a>
+    </div>
+
+    <!-- Barra de Ações e Filtros -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <!-- Search & Filter Form -->
+        <form method="GET" action="{{ url_for('os.index') }}" class="flex flex-1 flex-wrap sm:flex-nowrap items-center gap-3">
+            <div class="relative flex-1 min-w-[240px]">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                <input type="text" name="busca" value="{{ busca }}" placeholder="Buscar por nº OS, placa, modelo ou cliente..."
+                       class="w-full pl-10 pr-4 py-2.5 bg-slate-900/80 border border-slate-700/80 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all">
+                {% if busca %}
+                    <a href="{{ url_for('os.index', status=status_filtro) }}" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white text-xs">
+                        <i class="fa-solid fa-xmark"></i>
+                    </a>
+                {% endif %}
+            </div>
+
+            <select name="status" onchange="this.form.submit()"
+                    class="py-2.5 px-3 bg-slate-900/80 border border-slate-700/80 rounded-xl text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500/50">
+                <option value="">Todos os Status</option>
+                <option value="ABERTA" {% if status_filtro == 'ABERTA' %}selected{% endif %}>Aberta</option>
+                <option value="ORCAMENTO" {% if status_filtro == 'ORCAMENTO' %}selected{% endif %}>Orçamento</option>
+                <option value="APROVADA" {% if status_filtro == 'APROVADA' %}selected{% endif %}>Aprovada</option>
+                <option value="EM_ANDAMENTO" {% if status_filtro == 'EM_ANDAMENTO' %}selected{% endif %}>Em Andamento</option>
+                <option value="AGUARDANDO_PECAS" {% if status_filtro == 'AGUARDANDO_PECAS' %}selected{% endif %}>Aguardando Peças</option>
+                <option value="CONCLUIDA" {% if status_filtro == 'CONCLUIDA' %}selected{% endif %}>Concluída</option>
+                <option value="ENTREGUE" {% if status_filtro == 'ENTREGUE' %}selected{% endif %}>Entregue</option>
+                <option value="CANCELADA" {% if status_filtro == 'CANCELADA' %}selected{% endif %}>Cancelada</option>
+            </select>
+
+            <button type="submit" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-sm font-semibold border border-slate-700 transition-all">
+                Filtrar
+            </button>
+        </form>
+
+        <!-- Botão Nova OS -->
+        <a href="{{ url_for('os.novo') }}" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-semibold text-sm shadow-lg shadow-brand-600/30 transition-all active:scale-[0.98]">
+            <i class="fa-solid fa-plus text-xs"></i>
+            <span>Nova Ordem de Serviço</span>
+        </a>
+    </div>
+
+    <!-- Tabela de Ordens de Serviço -->
+    {% if ordens %}
+    <div class="glass-panel rounded-2xl overflow-hidden shadow-xl">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm text-slate-300">
+                <thead class="bg-slate-900/90 text-xs uppercase font-semibold text-slate-400 border-b border-slate-800">
+                    <tr>
+                        <th class="px-6 py-4">Nº OS</th>
+                        <th class="px-6 py-4">Cliente</th>
+                        <th class="px-6 py-4">Veículo</th>
+                        <th class="px-6 py-4">Status</th>
+                        <th class="px-6 py-4">Abertura / Previsão</th>
+                        <th class="px-6 py-4 text-right">Total</th>
+                        <th class="px-6 py-4 text-right">Ações</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-800/60">
+                    {% for os in ordens %}
+                    <tr class="hover:bg-slate-800/40 transition-colors group">
+                        <td class="px-6 py-4 font-mono font-bold text-brand-400">
+                            <a href="{{ url_for('os.detalhes', id=os.id) }}" class="hover:underline">
+                                #{{ os.numero }}
+                            </a>
+                        </td>
+                        <td class="px-6 py-4 font-medium text-slate-100">
+                            <div class="font-semibold text-slate-100">{{ os.cliente.nome }}</div>
+                            <div class="text-xs text-slate-400">{{ os.cliente.telefone or os.cliente.celular or 'Sem telefone' }}</div>
+                        </td>
+                        <td class="px-6 py-4 text-slate-300">
+                            {% if os.veiculo %}
+                                <div class="font-semibold flex items-center gap-1.5">
+                                    <span>{{ os.veiculo.modelo }}</span>
+                                    <span class="text-xs font-mono px-1.5 py-0.5 bg-slate-800 border border-slate-700 rounded text-slate-300">{{ os.veiculo.placa }}</span>
+                                </div>
+                                <div class="text-xs text-slate-400">{{ os.veiculo.marca }} {% if os.km_atual %} • {{ os.km_atual }} KM{% endif %}</div>
+                            {% else %}
+                                <span class="text-slate-500 italic">Não vinculado</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold {{ os.status_badge_class }}">
+                                {{ os.status }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-xs text-slate-400">
+                            <div><i class="fa-regular fa-calendar-plus text-slate-500 mr-1"></i> {{ os.data_abertura.strftime('%d/%m/%Y %H:%M') }}</div>
+                            {% if os.data_previsao %}
+                                <div class="mt-0.5 text-amber-400/90"><i class="fa-regular fa-clock text-amber-500/80 mr-1"></i> Prev: {{ os.data_previsao.strftime('%d/%m/%Y') }}</div>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 text-right font-semibold text-slate-100 font-mono">
+                            R$ {{ "%.2f"|format(os.valor_total)|replace('.', ',') }}
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <div class="flex items-center justify-end gap-2">
+                                <a href="{{ url_for('os.detalhes', id=os.id) }}" class="p-2 rounded-lg bg-slate-800 hover:bg-brand-600 hover:text-white text-slate-300 text-xs transition-colors" title="Gerenciar OS">
+                                    <i class="fa-solid fa-arrow-right"></i>
+                                </a>
+                                <a href="{{ url_for('os.editar', id=os.id) }}" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white text-xs transition-colors" title="Editar Dados Básicos">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% else %}
+    <div class="glass-panel rounded-2xl p-12 text-center">
+        <div class="w-16 h-16 rounded-2xl bg-slate-800/80 border border-slate-700 flex items-center justify-center text-slate-500 mx-auto mb-4">
+            <i class="fa-solid fa-file-invoice-dollar text-2xl"></i>
+        </div>
+        <h3 class="text-base font-semibold text-slate-200">Nenhuma Ordem de Serviço encontrada</h3>
+        <p class="text-sm text-slate-400 max-w-sm mx-auto mt-1 mb-6">
+            {% if busca or status_filtro %}
+                Nenhuma OS corresponde aos filtros selecionados. Tente limpar os filtros.
+            {% else %}
+                Inicie o atendimento abrindo uma nova Ordem de Serviço com checklist e diagnóstico.
+            {% endif %}
+        </p>
+        <div class="flex items-center justify-center gap-3">
+            {% if busca or status_filtro %}
+                <a href="{{ url_for('os.index') }}" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold transition-all">
+                    Limpar Filtros
+                </a>
+            {% endif %}
+            <a href="{{ url_for('os.novo') }}" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-sm font-semibold shadow-lg shadow-brand-600/30 transition-all">
+                <i class="fa-solid fa-plus text-xs"></i>
+                <span>Abrir Primeira OS</span>
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

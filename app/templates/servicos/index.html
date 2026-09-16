@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block title %}Catálogo de Serviços & Mão de Obra{% endblock %}
+{% block header_title %}Serviços & Mão de Obra{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Action Bar -->
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+            <p class="text-xs text-slate-400">Tabela de serviços padronizados, mão de obra, tempos estimados e valores de referência.</p>
+        </div>
+        <a href="{{ url_for('servicos.novo') }}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold rounded-xl shadow-lg shadow-brand-600/30 transition-all hover:scale-[1.02]">
+            <i class="fa-solid fa-plus"></i>
+            <span>Novo Serviço</span>
+        </a>
+    </div>
+
+    <!-- Search & Filter Bar -->
+    <div class="glass-panel rounded-2xl p-4 border border-slate-800 flex flex-col sm:flex-row items-center gap-4">
+        <form method="GET" class="w-full flex items-center gap-3">
+            <div class="relative flex-1">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+                <input type="text" name="q" value="{{ request.args.get('q', '') }}" placeholder="Buscar por código, nome do serviço, categoria..."
+                       class="w-full pl-10 pr-4 py-2 bg-slate-900 border border-slate-700/80 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all">
+            </div>
+            <button type="submit" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl border border-slate-700 transition-colors">
+                Filtrar
+            </button>
+            {% if request.args.get('q') %}
+            <a href="{{ url_for('servicos.index') }}" class="px-3 py-2 text-xs font-medium text-slate-400 hover:text-slate-200">
+                Limpar
+            </a>
+            {% endif %}
+        </form>
+    </div>
+
+    <!-- Table -->
+    <div class="glass-panel rounded-2xl border border-slate-800 overflow-hidden shadow-xl">
+        {% if servicos %}
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-300">
+                <thead class="bg-slate-900/80 uppercase tracking-wider text-[10px] text-slate-400 border-b border-slate-800 font-semibold">
+                    <tr>
+                        <th class="px-6 py-3.5">Código</th>
+                        <th class="px-6 py-3.5">Nome do Serviço</th>
+                        <th class="px-6 py-3.5">Categoria</th>
+                        <th class="px-6 py-3.5">Tempo Estimado</th>
+                        <th class="px-6 py-3.5">Valor Padrão</th>
+                        <th class="px-6 py-3.5">Status</th>
+                        <th class="px-6 py-3.5 text-right">Ações</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-800/60">
+                    {% for s in servicos %}
+                    <tr class="hover:bg-slate-800/30 transition-colors">
+                        <td class="px-6 py-4 font-mono font-medium text-slate-400 text-xs">
+                            {{ s.codigo or '-' }}
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="font-semibold text-white">{{ s.nome }}</div>
+                            {% if s.descricao %}
+                            <div class="text-[11px] text-slate-400 truncate max-w-xs">{{ s.descricao }}</div>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 text-slate-300">
+                            {{ s.categoria or 'Geral' }}
+                        </td>
+                        <td class="px-6 py-4 text-slate-300">
+                            {% if s.tempo_estimado_minutos %}
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-800 text-slate-300 text-[11px]">
+                                <i class="fa-regular fa-clock text-slate-500"></i>
+                                {{ s.tempo_estimado_minutos }} min
+                            </span>
+                            {% else %}
+                            <span class="text-slate-500">-</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 font-semibold text-brand-400 text-sm">
+                            R$ {{ "{:,.2f}".format(s.preco_padrao).replace(',', 'X').replace('.', ',').replace('X', '.') }}
+                        </td>
+                        <td class="px-6 py-4">
+                            {% if s.ativo %}
+                            <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Ativo
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-800 text-slate-400">
+                                Inativo
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <div class="flex items-center justify-end gap-2">
+                                <a href="{{ url_for('servicos.editar', id=s.id) }}" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors" title="Editar">
+                                    <i class="fa-solid fa-pen"></i>
+                                </a>
+                                <form action="{{ url_for('servicos.excluir', id=s.id) }}" method="POST" class="inline" onsubmit="return confirm('Deseja realmente remover este serviço?');">
+                                    <button type="submit" class="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 transition-colors" title="Excluir">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="py-16 text-center space-y-3">
+            <div class="w-12 h-12 rounded-full bg-slate-800 text-slate-500 flex items-center justify-center mx-auto text-xl">
+                <i class="fa-solid fa-wrench"></i>
+            </div>
+            <h3 class="text-sm font-semibold text-slate-200">Nenhum serviço cadastrado</h3>
+            <p class="text-xs text-slate-500 max-w-sm mx-auto">Cadastre sua tabela de mão de obra para agilizar a criação de orçamentos e ordens de serviço.</p>
+            <div class="pt-2">
+                <a href="{{ url_for('servicos.novo') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold rounded-xl transition-all">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>Cadastrar Serviço</span>
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

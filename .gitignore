@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Ambiente e segredos
+.env
+.env.local
+
+# Aplicação (dados locais)
+autocarsystem.db
+backups/
+*.sqlite
+*.sqlite3
+
+# IDEs e SO
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Kilo
+.kilo/
+
+# Testes/relatórios gerados
+agents/reports/
+logs_de_sprint.md

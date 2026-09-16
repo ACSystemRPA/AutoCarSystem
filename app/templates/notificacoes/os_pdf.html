@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @page {
+            size: A4 portrait;
+            margin: 15mm 15mm 15mm 15mm;
+        }
+        body {
+            font-family: Helvetica, Arial, sans-serif;
+            font-size: 9pt;
+            color: #1e293b;
+            line-height: 1.4;
+        }
+        h1, h2, h3 { margin: 0; }
+        .header {
+            border-bottom: 3px solid #4f46e5;
+            padding-bottom: 8px;
+            margin-bottom: 10px;
+            display: table;
+            width: 100%;
+        }
+        .header-left { float: left; width: 60%; }
+        .header-right { float: right; width: 40%; text-align: right; }
+        .company-name { font-size: 14pt; font-weight: bold; color: #4f46e5; }
+        .company-info { font-size: 7.5pt; color: #64748b; margin-top: 2px; }
+        .os-number { font-size: 16pt; font-weight: bold; color: #1e293b; }
+        .status-badge {
+            display: inline-block;
+            background: #4f46e5;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 8pt;
+            font-weight: bold;
+            margin-top: 3px;
+        }
+        .section-title {
+            background: #f1f5f9;
+            padding: 4px 8px;
+            font-size: 9pt;
+            font-weight: bold;
+            color: #334155;
+            border-left: 3px solid #4f46e5;
+            margin: 10px 0 6px 0;
+            width: 100%;
+        }
+        .info-grid { width: 100%; margin-bottom: 4px; }
+        .info-grid td { padding: 2px 0; vertical-align: top; }
+        .label { font-weight: bold; color: #475569; width: 110px; font-size: 8pt; }
+        .value { font-size: 8.5pt; }
+        table.items {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 4px 0 8px 0;
+            font-size: 8pt;
+        }
+        table.items th {
+            background: #4f46e5;
+            color: white;
+            padding: 5px 6px;
+            text-align: left;
+            font-size: 7.5pt;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        table.items th.right, table.items td.right { text-align: right; }
+        table.items th.center, table.items td.center { text-align: center; }
+        table.items td {
+            padding: 4px 6px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        table.items tr:nth-child(even) td { background: #f8fafc; }
+        .totals { width: 50%; float: right; margin-top: 6px; }
+        .totals table { width: 100%; border-collapse: collapse; font-size: 8.5pt; }
+        .totals td { padding: 3px 6px; }
+        .totals .label { width: auto; }
+        .totals .total-row td {
+            border-top: 2px solid #4f46e5;
+            font-weight: bold;
+            font-size: 10pt;
+            color: #0f172a;
+            padding-top: 5px;
+        }
+        .footer {
+            clear: both;
+            margin-top: 20px;
+            padding-top: 8px;
+            border-top: 1px solid #cbd5e1;
+            font-size: 7pt;
+            color: #94a3b8;
+            text-align: center;
+        }
+        .clearfix::after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+        .obs-box {
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            padding: 6px 8px;
+            font-size: 8pt;
+            margin: 6px 0 10px 0;
+            color: #475569;
+            width: 100%;
+        }
+        .checklist { font-size: 8pt; margin: 4px 0; }
+        .checklist span { display: inline-block; margin-right: 12px; }
+    </style>
+</head>
+<body>
+
+<div class="header clearfix">
+    <div class="header-left">
+        <div class="company-name">{{ empresa.nome_fantasia or empresa.razao_social }}</div>
+        <div class="company-info">
+            {% if empresa.razao_social %}{{ empresa.razao_social }}{% endif %}
+            {% if empresa.cnpj %} | CNPJ: {{ empresa.cnpj }}{% endif %}
+            {% if empresa.telefone %} | Tel: {{ empresa.telefone }}{% endif %}
+            {% if empresa.cidade %} | {{ empresa.cidade }}{% endif %}
+        </div>
+    </div>
+    <div class="header-right">
+        <div class="os-number">{{ os.numero_os }}</div>
+        <div style="font-size:8pt; color:#64748b;">
+            {% if os.tipo == 'ORCAMENTO' %}Orçamento{% else %}Ordem de Serviço{% endif %}
+        </div>
+        <div class="status-badge">{{ os.status.replace('_',' ').title() }}</div>
+    </div>
+</div>
+
+<div class="clearfix">
+    <div class="header-left">
+        <table class="info-grid">
+            <tr><td class="label">Data Abertura:</td><td class="value">{{ os.data_abertura.strftime('%d/%m/%Y %H:%M') if os.data_abertura else '—' }}</td></tr>
+            <tr><td class="label">Responsável:</td><td class="value">{{ os.responsavel.nome if os.responsavel else '—' }}</td></tr>
+            {% if os.data_previsao_entrega %}
+            <tr><td class="label">Previsão Entrega:</td><td class="value">{{ os.data_previsao_entrega.strftime('%d/%m/%Y') }}</td></tr>
+            {% endif %}
+        </table>
+    </div>
+    <div class="header-right">
+        {% if os.forma_pagamento %}
+        <table class="info-grid">
+            <tr><td class="label">Forma Pgto:</td><td class="value">{{ os.forma_pagamento }}</td></tr>
+        </table>
+        {% endif %}
+    </div>
+</div>
+
+<!-- CLIENTE -->
+<table class="section-title" border="0"><tr><td>CLIENTE</td></tr></table>
+<table class="info-grid">
+    <tr><td class="label">Nome:</td><td class="value">{{ os.cliente.nome if os.cliente else '—' }}</td></tr>
+    {% if os.cliente %}
+    {% if os.cliente.cpf_cnpj %}
+    <tr><td class="label">CPF/CNPJ:</td><td class="value">{{ os.cliente.cpf_cnpj }}</td></tr>
+    {% endif %}
+    {% if os.cliente.telefone %}
+    <tr><td class="label">Telefone:</td><td class="value">{{ os.cliente.telefone }}</td></tr>
+    {% endif %}
+    {% if os.cliente.email %}
+    <tr><td class="label">E-mail:</td><td class="value">{{ os.cliente.email }}</td></tr>
+    {% endif %}
+    {% if os.cliente.endereco or os.cliente.cidade %}
+    <tr><td class="label">Endereço:</td><td class="value">{{ os.cliente.endereco or '' }}{% if os.cliente.cidade %} — {{ os.cliente.cidade }}{% endif %}</td></tr>
+    {% endif %}
+    {% endif %}
+</table>
+
+<!-- VEÍCULO -->
+<table class="section-title" border="0"><tr><td>VEÍCULO</td></tr></table>
+<table class="info-grid">
+    {% if os.veiculo %}
+    <tr><td class="label">Placa:</td><td class="value" style="font-weight:bold;">{{ os.veiculo.placa or '—' }}</td></tr>
+    <tr><td class="label">Veículo:</td><td class="value">{{ os.veiculo.marca }} {{ os.veiculo.modelo }} ({{ os.veiculo.ano_fabricacao or 's/I' }}{% if os.veiculo.ano_modelo %}/{{ os.veiculo.ano_modelo }}{% endif %})</td></tr>
+    <tr><td class="label">Cor:</td><td class="value">{{ os.veiculo.cor or '—' }}</td></tr>
+    <tr><td class="label">KM Atual:</td><td class="value">{{ os.km_atual ~ ' KM' if os.km_atual else 'Não informado' }}</td></tr>
+    <tr><td class="label">Combustível:</td><td class="value">{{ os.nivel_combustivel or 'Não informado' }}</td></tr>
+    {% else %}
+    <tr><td class="value" style="color:#94a3b8; font-style:italic;">Nenhum veículo vinculado.</td></tr>
+    {% endif %}
+</table>
+
+<!-- DEFEITO / DIAGNÓSTICO -->
+<table class="section-title" border="0"><tr><td>RELATO / DIAGNÓSTICO</td></tr></table>
+<table class="info-grid">
+    <tr><td class="label">Defeito Reclamado:</td><td class="value">{{ os.defeito_reclamado or '—' }}</td></tr>
+    <tr><td class="label">Diagnóstico Técnico:</td><td class="value">{{ os.diagnostico_tecnico or '—' }}</td></tr>
+</table>
+
+<!-- CHECKLIST -->
+{% set chk = os.checklist_dict %}
+{% if chk %}
+<table class="section-title" border="0"><tr><td>CHECKLIST DE VISTORIA</td></tr></table>
+<div class="checklist">
+    <span>{% if chk.get('estepe') %}✓{% else %}✗{% endif %} Estepe</span>
+    <span>{% if chk.get('macaco') %}✓{% else %}✗{% endif %} Macaco</span>
+    <span>{% if chk.get('chave_roda') %}✓{% else %}✗{% endif %} Chave de Roda</span>
+    <span>{% if chk.get('triangulo') %}✓{% else %}✗{% endif %} Triângulo</span>
+    <span>{% if chk.get('documento') %}✓{% else %}✗{% endif %} Documento</span>
+    {% if chk.get('pertences') %}
+    <br/><b>Pertences:</b> {{ chk.get('pertences') }}
+    {% endif %}
+    {% if chk.get('avarias_visuais') %}
+    <br/><b>Avarias na lataria:</b> {{ chk.get('avarias_visuais') }}
+    {% endif %}
+</div>
+{% endif %}
+
+<!-- SERVIÇOS -->
+{% set itens_servico = os.itens_servicos.all() if os.itens_servicos else [] %}
+{% if itens_servico %}
+<table class="section-title" border="0"><tr><td>SERVIÇOS / MÃO DE OBRA</td></tr></table>
+<table class="items">
+    <thead>
+        <tr>
+            <th>Descrição</th>
+            <th>Mecânico</th>
+            <th class="right">Unitário</th>
+            <th class="center">Qtd</th>
+            <th class="right">Subtotal</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in itens_servico %}
+        <tr>
+            <td>{{ item.descricao }}</td>
+            <td>{{ item.mecanico.nome if item.mecanico else '—' }}</td>
+            <td class="right">R$ {{ "%.2f"|format(item.valor_unitario) }}</td>
+            <td class="center">{{ item.quantidade }}</td>
+            <td class="right" style="font-weight:bold;">R$ {{ "%.2f"|format(item.subtotal) }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+
+<!-- PEÇAS -->
+{% set itens_peca = os.itens_pecas.all() if os.itens_pecas else [] %}
+{% if itens_peca %}
+<table class="section-title" border="0"><tr><td>PEÇAS / PRODUTOS DO ESTOQUE</td></tr></table>
+<table class="items">
+    <thead>
+        <tr>
+            <th>Descrição</th>
+            <th>Código / Marca</th>
+            <th class="right">Unitário</th>
+            <th class="center">Qtd</th>
+            <th class="right">Subtotal</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in itens_peca %}
+        <tr>
+            <td>{{ item.descricao }}</td>
+            <td>{% if item.peca %}{{ item.peca.codigo_referencia or item.peca.marca or '—' }}{% else %}—{% endif %}</td>
+            <td class="right">R$ {{ "%.2f"|format(item.valor_unitario) }}</td>
+            <td class="center">{{ item.quantidade }}</td>
+            <td class="right" style="font-weight:bold;">R$ {{ "%.2f"|format(item.subtotal) }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+
+{% if os.observacoes_internas %}
+<table class="section-title" border="0"><tr><td>OBSERVAÇÕES INTERNAS</td></tr></table>
+<table class="info-grid">
+    <tr><td class="value">{{ os.observacoes_internas }}</td></tr>
+</table>
+{% endif %}
+
+<!-- TOTAIS -->
+<div class="totals clearfix">
+    <table>
+        <tr><td class="label">Serviços:</td><td style="text-align:right;">R$ {{ "%.2f"|format(os.valor_servicos or 0.0) }}</td></tr>
+        <tr><td class="label">Peças / Produtos:</td><td style="text-align:right;">R$ {{ "%.2f"|format(os.valor_pecas or 0.0) }}</td></tr>
+        {% if os.desconto and os.desconto > 0 %}
+        <tr><td class="label">Desconto:</td><td style="text-align:right; color:#be123c;">- R$ {{ "%.2f"|format(os.desconto) }}</td></tr>
+        {% endif %}
+        <tr class="total-row">
+            <td class="label" style="font-size:10pt;">VALOR TOTAL:</td>
+            <td style="text-align:right; font-size:11pt; color:#4f46e5; font-weight:bold;">R$ {{ "%.2f"|format(os.valor_total) }}</td>
+        </tr>
+    </table>
+</div>
+
+<div class="footer">
+    {{ empresa.nome_fantasia or empresa.razao_social }} |
+    {% if empresa.telefone %}Tel: {{ empresa.telefone }} |{% endif %}
+    {% if empresa.cidade %}{{ empresa.cidade }} |{% endif %}
+    Documento gerado em {{ os.data_abertura.strftime('%d/%m/%Y às %H:%M') if os.data_abertura else '—' }} por {{ usuario.nome }}
+</div>
+
+</body>
+</html>

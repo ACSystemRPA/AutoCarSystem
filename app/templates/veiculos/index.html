@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}Veículos Cadastrados{% endblock %}
+{% block header_title %}Gestão de Veículos{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Top Action Bar -->
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+            <p class="text-xs text-slate-400">Frota e veículos registrados na oficina com histórico e proprietários.</p>
+        </div>
+        <a href="{{ url_for('veiculos.novo') }}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold rounded-xl shadow-lg shadow-brand-600/30 transition-all hover:scale-[1.02]">
+            <i class="fa-solid fa-plus"></i>
+            <span>Novo Veículo</span>
+        </a>
+    </div>
+
+    <!-- Search & Filter Bar -->
+    <div class="glass-panel rounded-2xl p-4 border border-slate-800 flex flex-col sm:flex-row items-center gap-4">
+        <form method="GET" class="w-full flex items-center gap-3">
+            <div class="relative flex-1">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+                <input type="text" name="q" value="{{ request.args.get('q', '') }}" placeholder="Buscar por placa, modelo, marca ou chassi..."
+                       class="w-full pl-10 pr-4 py-2 bg-slate-900 border border-slate-700/80 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all">
+            </div>
+            <button type="submit" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl border border-slate-700 transition-colors">
+                Filtrar
+            </button>
+            {% if request.args.get('q') %}
+            <a href="{{ url_for('veiculos.index') }}" class="px-3 py-2 text-xs font-medium text-slate-400 hover:text-slate-200">
+                Limpar
+            </a>
+            {% endif %}
+        </form>
+    </div>
+
+    <!-- Vehicles List Table -->
+    <div class="glass-panel rounded-2xl border border-slate-800 overflow-hidden shadow-xl">
+        {% if veiculos %}
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-300">
+                <thead class="bg-slate-900/80 uppercase tracking-wider text-[10px] text-slate-400 border-b border-slate-800 font-semibold">
+                    <tr>
+                        <th class="px-6 py-3.5">Placa</th>
+                        <th class="px-6 py-3.5">Veículo</th>
+                        <th class="px-6 py-3.5">Proprietário</th>
+                        <th class="px-6 py-3.5">KM Atual</th>
+                        <th class="px-6 py-3.5">Cor / Detalhes</th>
+                        <th class="px-6 py-3.5 text-right">Ações</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-800/60">
+                    {% for v in veiculos %}
+                    <tr class="hover:bg-slate-800/30 transition-colors">
+                        <td class="px-6 py-4 font-medium text-white">
+                            <span class="px-2.5 py-1 rounded-md bg-brand-500/10 border border-brand-500/20 text-brand-400 font-mono font-bold text-xs uppercase tracking-wider">
+                                {{ v.placa }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="font-semibold text-white">{{ v.marca }} {{ v.modelo }}</div>
+                            <div class="text-[11px] text-slate-400">{{ v.ano or 'Ano N/I' }}</div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <a href="{{ url_for('clientes.detalhes', id=v.cliente.id) }}" class="text-slate-200 hover:text-brand-400 font-medium">
+                                {{ v.cliente.nome }}
+                            </a>
+                        </td>
+                        <td class="px-6 py-4 text-slate-300">
+                            {% if v.km_atual %}
+                            {{ "{:,}".format(v.km_atual).replace(',', '.') }} km
+                            {% else %}
+                            <span class="text-slate-500">-</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 text-slate-400">
+                            {{ v.cor or 'Cor N/I' }}
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <div class="flex items-center justify-end gap-2">
+                                <a href="{{ url_for('veiculos.editar', id=v.id) }}" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors" title="Editar">
+                                    <i class="fa-solid fa-pen"></i>
+                                </a>
+                                <form action="{{ url_for('veiculos.excluir', id=v.id) }}" method="POST" class="inline" onsubmit="return confirm('Deseja realmente remover este veículo?');">
+                                    <button type="submit" class="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 transition-colors" title="Excluir">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="py-16 text-center space-y-3">
+            <div class="w-12 h-12 rounded-full bg-slate-800 text-slate-500 flex items-center justify-center mx-auto text-xl">
+                <i class="fa-solid fa-car"></i>
+            </div>
+            <h3 class="text-sm font-semibold text-slate-200">Nenhum veículo encontrado</h3>
+            <p class="text-xs text-slate-500 max-w-sm mx-auto">Cadastre veículos e associe aos clientes para gerar ordens de serviço e manutenções.</p>
+            <div class="pt-2">
+                <a href="{{ url_for('veiculos.novo') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold rounded-xl transition-all">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>Cadastrar Veículo</span>
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

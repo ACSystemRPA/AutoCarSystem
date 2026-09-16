@@ -1,0 +1,616 @@
+{% extends "base.html" %}
+
+{% block title %}OS #{{ os.numero }} - {{ os.cliente.nome }}{% endblock %}
+{% block header_title %}Ordem de Serviço #{{ os.numero }}{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header Superior com Status e Ações Rápidas -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div class="flex items-center gap-3">
+            <a href="{{ url_for('os.index') }}" class="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-slate-700 transition-all">
+                <i class="fa-solid fa-arrow-left text-sm"></i>
+            </a>
+            <div>
+                <div class="flex items-center gap-2.5">
+                    <h2 class="text-xl font-bold text-white font-mono">OS #{{ os.numero }}</h2>
+                    <span class="inline-flex items-center px-3 py-0.5 rounded-full text-xs font-semibold {{ os.status_badge_class }}">
+                        {{ os.status }}
+                    </span>
+                </div>
+                <p class="text-xs text-slate-400 mt-0.5">
+                    Aberta em {{ os.data_abertura.strftime('%d/%m/%Y às %H:%M') }} por <span class="text-slate-300 font-medium">{{ os.usuario_abertura.nome if os.usuario_abertura else 'Sistema' }}</span>
+                </p>
+            </div>
+        </div>
+
+        <!-- Botões de Ação -->
+        <div class="flex flex-wrap items-center gap-2">
+            <!-- Mudar Status Dropdown / Botão -->
+            <button onclick="document.getElementById('modal-status').classList.remove('hidden')"
+                    class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-100 text-xs font-semibold border border-slate-700 transition-all flex items-center gap-2">
+                <i class="fa-solid fa-arrows-rotate text-brand-400"></i>
+                <span>Alterar Status</span>
+            </button>
+
+            <!-- Editar Dados Básicos -->
+            <a href="{{ url_for('os.editar', id=os.id) }}"
+               class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition-all flex items-center gap-2">
+                <i class="fa-solid fa-pen text-slate-400"></i>
+                <span>Editar OS</span>
+            </a>
+
+            <!-- Ações de Notificação e Impressão -->
+            <div class="flex items-center gap-2">
+                <a href="{{ url_for('notificacoes.pdf', id=os.id) }}" target="_blank"
+                   class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-file-pdf text-rose-400"></i>
+                    <span>PDF</span>
+                </a>
+                <a href="{{ url_for('notificacoes.whatsapp', id=os.id) }}" target="_blank"
+                   class="px-4 py-2 rounded-xl bg-emerald-900/40 hover:bg-emerald-900/60 text-emerald-300 text-xs font-semibold border border-emerald-900/50 transition-all flex items-center gap-2">
+                    <i class="fa-brands fa-whatsapp"></i>
+                    <span>WhatsApp</span>
+                </a>
+                <form method="POST" action="{{ url_for('notificacoes.enviar_email', id=os.id) }}" class="inline">
+                    <button type="submit" onclick="return confirm('Enviar orçamento por e-mail para o cliente?');"
+                            class="px-4 py-2 rounded-xl bg-indigo-900/40 hover:bg-indigo-900/60 text-indigo-300 text-xs font-semibold border border-indigo-900/50 transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-envelope"></i>
+                        <span>E-mail</span>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Excluir OS (se aberta/cancelada) -->
+            {% if os.status in ['ABERTA', 'CANCELADA', 'ORCAMENTO'] %}
+            <form method="POST" action="{{ url_for('os.excluir', id=os.id) }}" onsubmit="return confirm('Deseja realmente excluir esta Ordem de Serviço permanentemente?');" class="inline">
+                <button type="submit" class="px-3 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-semibold border border-rose-500/30 transition-all">
+                    <i class="fa-regular fa-trash-can"></i>
+                </button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Info Cards Grid: Cliente, Veículo e Resumo -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <!-- Card 1: Cliente -->
+        <div class="glass-panel p-5 rounded-2xl border border-slate-800 space-y-3">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                    <i class="fa-solid fa-user text-brand-400"></i> Cliente
+                </span>
+                <a href="{{ url_for('clientes.detalhes', id=os.cliente.id) }}" class="text-[11px] text-brand-400 hover:underline">Ver Cadastro</a>
+            </div>
+            <div>
+                <h3 class="text-base font-bold text-slate-100">{{ os.cliente.nome }}</h3>
+                <p class="text-xs text-slate-400">{{ os.cliente.cpf_cnpj or 'Documento não informado' }}</p>
+            </div>
+            <div class="space-y-1 text-xs text-slate-300">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-phone text-slate-500 w-4"></i>
+                    <span>{{ os.cliente.celular or os.cliente.telefone or 'Sem telefone' }}</span>
+                </div>
+                {% if os.cliente.email %}
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-envelope text-slate-500 w-4"></i>
+                    <span class="truncate">{{ os.cliente.email }}</span>
+                </div>
+                {% endif %}
+                {% if os.cliente.cidade %}
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-location-dot text-slate-500 w-4"></i>
+                    <span>{{ os.cliente.cidade }}{% if os.cliente.estado %} - {{ os.cliente.estado }}{% endif %}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Card 2: Veículo -->
+        <div class="glass-panel p-5 rounded-2xl border border-slate-800 space-y-3">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                    <i class="fa-solid fa-car text-indigo-400"></i> Veículo
+                </span>
+                {% if os.veiculo %}
+                <a href="{{ url_for('veiculos.editar', id=os.veiculo.id) }}" class="text-[11px] text-brand-400 hover:underline">Ver / Editar</a>
+                {% endif %}
+            </div>
+            {% if os.veiculo %}
+            <div>
+                <div class="flex items-center gap-2">
+                    <h3 class="text-base font-bold text-slate-100">{{ os.veiculo.modelo }}</h3>
+                    <span class="text-xs font-mono font-bold px-2 py-0.5 bg-slate-800 border border-slate-700 rounded text-brand-400">{{ os.veiculo.placa }}</span>
+                </div>
+                <p class="text-xs text-slate-400">{{ os.veiculo.marca }} • {{ os.veiculo.ano_fabricacao }}/{{ os.veiculo.ano_modelo }} • {{ os.veiculo.cor or 'Cor n/i' }}</p>
+            </div>
+            <div class="space-y-1 text-xs text-slate-300">
+                <div class="flex items-center justify-between">
+                    <span class="text-slate-400">KM no Atendimento:</span>
+                    <span class="font-semibold text-slate-100">{{ os.km_atual ~ ' KM' if os.km_atual else 'Não informado' }}</span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-slate-400">Nível Combustível:</span>
+                    <span class="font-semibold text-amber-400">{{ os.combustivel_nivel or 'Não informado' }}</span>
+                </div>
+            </div>
+            {% else %}
+            <p class="text-xs text-slate-500 italic py-4">Nenhum veículo vinculado a esta OS.</p>
+            {% endif %}
+        </div>
+
+        <!-- Card 3: Prazos e Totalizador -->
+        <div class="glass-panel p-5 rounded-2xl border border-slate-800 flex flex-col justify-between space-y-3">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                    <i class="fa-solid fa-coins text-emerald-400"></i> Totais & Prazos
+                </span>
+                {% if os.data_previsao %}
+                <span class="text-[11px] text-amber-400 font-medium">
+                    Prev: {{ os.data_previsao.strftime('%d/%m/%Y') }}
+                </span>
+                {% endif %}
+            </div>
+            <div class="space-y-1.5 text-xs text-slate-300">
+                <div class="flex justify-between">
+                    <span class="text-slate-400">Serviços:</span>
+                    <span class="font-mono">R$ {{ "%.2f"|format(os.valor_servicos)|replace('.', ',') }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-400">Peças / Produtos:</span>
+                    <span class="font-mono">R$ {{ "%.2f"|format(os.valor_pecas)|replace('.', ',') }}</span>
+                </div>
+                {% if os.valor_desconto > 0 %}
+                <div class="flex justify-between text-rose-400">
+                    <span>Desconto Total:</span>
+                    <span class="font-mono">- R$ {{ "%.2f"|format(os.valor_desconto)|replace('.', ',') }}</span>
+                </div>
+                {% endif %}
+            </div>
+            <div class="pt-2 border-t border-slate-800 flex items-center justify-between">
+                <span class="text-xs font-bold uppercase text-slate-300">Valor Total</span>
+                <span class="text-xl font-extrabold text-emerald-400 font-mono">
+                    R$ {{ "%.2f"|format(os.valor_total)|replace('.', ',') }}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Grid Central: Tabela de Itens (Serviços e Peças) + Checklist e Diagnóstico -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Coluna Esquerda (2/3): Serviços e Peças -->
+        <div class="lg:col-span-2 space-y-6">
+            <!-- Bloco 1: Serviços Executados / Mão de Obra -->
+            <div class="glass-panel rounded-2xl overflow-hidden shadow-xl border border-slate-800">
+                <div class="p-4 sm:p-5 bg-slate-900/90 border-b border-slate-800 flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-7 h-7 rounded-lg bg-brand-500/20 text-brand-400 flex items-center justify-center text-xs">
+                            <i class="fa-solid fa-wrench"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-100">Serviços & Mão de Obra</h3>
+                            <span class="text-[11px] text-slate-400">{{ os.itens_servico|length }} serviço(s) adicionado(s)</span>
+                        </div>
+                    </div>
+                    {% if os.status not in ['CONCLUIDA', 'ENTREGUE', 'CANCELADA'] %}
+                    <button onclick="document.getElementById('modal-servico').classList.remove('hidden')"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold shadow transition-all">
+                        <i class="fa-solid fa-plus text-[10px]"></i>
+                        <span>Adicionar Serviço</span>
+                    </button>
+                    {% endif %}
+                </div>
+
+                {% if os.itens_servico %}
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs text-slate-300">
+                        <thead class="bg-slate-950/60 uppercase font-semibold text-slate-400 border-b border-slate-800">
+                            <tr>
+                                <th class="px-5 py-3">Descrição do Serviço</th>
+                                <th class="px-4 py-3">Mecânico / Técnico</th>
+                                <th class="px-4 py-3 text-right">Unitário</th>
+                                <th class="px-3 py-3 text-center">Qtd</th>
+                                <th class="px-4 py-3 text-right">Subtotal</th>
+                                <th class="px-4 py-3 text-center">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800/60">
+                            {% for item in os.itens_servico %}
+                            <tr class="hover:bg-slate-800/30 transition-colors">
+                                <td class="px-5 py-3.5 font-medium text-slate-100">
+                                    {{ item.servico.nome if item.servico else 'Serviço Personalizado' }}
+                                    {% if item.observacoes %}
+                                        <div class="text-[10px] text-slate-400">{{ item.observacoes }}</div>
+                                    {% endif %}
+                                </td>
+                                <td class="px-4 py-3.5 text-slate-400">
+                                    {{ item.mecanico.nome if item.mecanico else '—' }}
+                                </td>
+                                <td class="px-4 py-3.5 text-right font-mono text-slate-300">
+                                    R$ {{ "%.2f"|format(item.valor_unitario)|replace('.', ',') }}
+                                </td>
+                                <td class="px-3 py-3.5 text-center font-semibold text-slate-200">
+                                    {{ item.quantidade }}
+                                </td>
+                                <td class="px-4 py-3.5 text-right font-mono font-bold text-slate-100">
+                                    R$ {{ "%.2f"|format(item.valor_total)|replace('.', ',') }}
+                                </td>
+                                <td class="px-4 py-3.5 text-center">
+                                    {% if os.status not in ['CONCLUIDA', 'ENTREGUE', 'CANCELADA'] %}
+                                    <form method="POST" action="{{ url_for('os.remover_servico', id=os.id, item_id=item.id) }}" onsubmit="return confirm('Remover este serviço?');" class="inline">
+                                        <button type="submit" class="p-1.5 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition-colors" title="Remover">
+                                            <i class="fa-regular fa-trash-can text-xs"></i>
+                                        </button>
+                                    </form>
+                                    {% else %}
+                                    <span class="text-slate-600">—</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="p-6 text-center text-xs text-slate-500">
+                    Nenhum serviço lançado nesta Ordem de Serviço ainda.
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Bloco 2: Peças & Produtos Aplicados -->
+            <div class="glass-panel rounded-2xl overflow-hidden shadow-xl border border-slate-800">
+                <div class="p-4 sm:p-5 bg-slate-900/90 border-b border-slate-800 flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-7 h-7 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-xs">
+                            <i class="fa-solid fa-gears"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-100">Peças & Produtos do Estoque</h3>
+                            <span class="text-[11px] text-slate-400">{{ os.itens_peca|length }} item(ns) lançado(s)</span>
+                        </div>
+                    </div>
+                    {% if os.status not in ['CONCLUIDA', 'ENTREGUE', 'CANCELADA'] %}
+                    <button onclick="document.getElementById('modal-peca').classList.remove('hidden')"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow transition-all">
+                        <i class="fa-solid fa-plus text-[10px]"></i>
+                        <span>Adicionar Peça</span>
+                    </button>
+                    {% endif %}
+                </div>
+
+                {% if os.itens_peca %}
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs text-slate-300">
+                        <thead class="bg-slate-950/60 uppercase font-semibold text-slate-400 border-b border-slate-800">
+                            <tr>
+                                <th class="px-5 py-3">Descrição da Peça</th>
+                                <th class="px-4 py-3">Código / Marca</th>
+                                <th class="px-4 py-3 text-right">Unitário</th>
+                                <th class="px-3 py-3 text-center">Qtd</th>
+                                <th class="px-4 py-3 text-right">Subtotal</th>
+                                <th class="px-4 py-3 text-center">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800/60">
+                            {% for item in os.itens_peca %}
+                            <tr class="hover:bg-slate-800/30 transition-colors">
+                                <td class="px-5 py-3.5 font-medium text-slate-100">
+                                    {{ item.peca.nome if item.peca else 'Peça Personalizada' }}
+                                </td>
+                                <td class="px-4 py-3.5 text-slate-400 font-mono text-[11px]">
+                                    {{ item.peca.codigo_interno or item.peca.codigo_fabricante or item.peca.marca or '—' }}
+                                </td>
+                                <td class="px-4 py-3.5 text-right font-mono text-slate-300">
+                                    R$ {{ "%.2f"|format(item.valor_unitario)|replace('.', ',') }}
+                                </td>
+                                <td class="px-3 py-3.5 text-center font-semibold text-slate-200">
+                                    {{ item.quantidade }}
+                                </td>
+                                <td class="px-4 py-3.5 text-right font-mono font-bold text-slate-100">
+                                    R$ {{ "%.2f"|format(item.valor_total)|replace('.', ',') }}
+                                </td>
+                                <td class="px-4 py-3.5 text-center">
+                                    {% if os.status not in ['CONCLUIDA', 'ENTREGUE', 'CANCELADA'] %}
+                                    <form method="POST" action="{{ url_for('os.remover_peca', id=os.id, item_id=item.id) }}" onsubmit="return confirm('Remover esta peça?');" class="inline">
+                                        <button type="submit" class="p-1.5 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition-colors" title="Remover">
+                                            <i class="fa-regular fa-trash-can text-xs"></i>
+                                        </button>
+                                    </form>
+                                    {% else %}
+                                    <span class="text-slate-600">—</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="p-6 text-center text-xs text-slate-500">
+                    Nenhuma peça do estoque lançada nesta OS ainda.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Coluna Direita (1/3): Checklist, Diagnóstico e Laudos -->
+        <div class="space-y-6">
+            <!-- Diagnóstico & Relato -->
+            <div class="glass-panel p-5 rounded-2xl border border-slate-800 space-y-4">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                    <i class="fa-solid fa-clipboard-list text-amber-400"></i> Relato & Parecer Técnico
+                </h3>
+
+                <div>
+                    <label class="block text-[11px] font-semibold text-slate-400 mb-1">Defeito Reclamado:</label>
+                    <div class="p-3 bg-slate-900/90 border border-slate-800 rounded-xl text-xs text-slate-200 leading-relaxed">
+                        {{ os.defeito_reclamado }}
+                    </div>
+                </div>
+
+                {% if os.diagnostico %}
+                <div>
+                    <label class="block text-[11px] font-semibold text-slate-400 mb-1">Diagnóstico do Mecânico:</label>
+                    <div class="p-3 bg-slate-900/90 border border-slate-800 rounded-xl text-xs text-slate-200 leading-relaxed">
+                        {{ os.diagnostico }}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if os.observacoes %}
+                <div>
+                    <label class="block text-[11px] font-semibold text-slate-400 mb-1">Observações Internas:</label>
+                    <div class="p-3 bg-slate-900/90 border border-slate-800 rounded-xl text-xs text-slate-400 leading-relaxed">
+                        {{ os.observacoes }}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Checklist Visual de Entrada -->
+            {% set chk = os.checklist_dict %}
+            <div class="glass-panel p-5 rounded-2xl border border-slate-800 space-y-4">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                    <i class="fa-solid fa-list-check text-emerald-400"></i> Checklist de Vistoria
+                </h3>
+
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                    <div class="flex items-center gap-2 p-2 rounded-lg bg-slate-900/60 border border-slate-800/80">
+                        <i class="fa-solid {{ 'fa-circle-check text-emerald-400' if chk.get('estepe') else 'fa-circle-xmark text-slate-600' }}"></i>
+                        <span class="{{ 'text-slate-200 font-medium' if chk.get('estepe') else 'text-slate-500' }}">Estepe</span>
+                    </div>
+                    <div class="flex items-center gap-2 p-2 rounded-lg bg-slate-900/60 border border-slate-800/80">
+                        <i class="fa-solid {{ 'fa-circle-check text-emerald-400' if chk.get('macaco') else 'fa-circle-xmark text-slate-600' }}"></i>
+                        <span class="{{ 'text-slate-200 font-medium' if chk.get('macaco') else 'text-slate-500' }}">Macaco</span>
+                    </div>
+                    <div class="flex items-center gap-2 p-2 rounded-lg bg-slate-900/60 border border-slate-800/80">
+                        <i class="fa-solid {{ 'fa-circle-check text-emerald-400' if chk.get('chave_roda') else 'fa-circle-xmark text-slate-600' }}"></i>
+                        <span class="{{ 'text-slate-200 font-medium' if chk.get('chave_roda') else 'text-slate-500' }}">Chave de Roda</span>
+                    </div>
+                    <div class="flex items-center gap-2 p-2 rounded-lg bg-slate-900/60 border border-slate-800/80">
+                        <i class="fa-solid {{ 'fa-circle-check text-emerald-400' if chk.get('triangulo') else 'fa-circle-xmark text-slate-600' }}"></i>
+                        <span class="{{ 'text-slate-200 font-medium' if chk.get('triangulo') else 'text-slate-500' }}">Triângulo</span>
+                    </div>
+                    <div class="flex items-center gap-2 p-2 rounded-lg bg-slate-900/60 border border-slate-800/80">
+                        <i class="fa-solid {{ 'fa-circle-check text-emerald-400' if chk.get('documento') else 'fa-circle-xmark text-slate-600' }}"></i>
+                        <span class="{{ 'text-slate-200 font-medium' if chk.get('documento') else 'text-slate-500' }}">Documento</span>
+                    </div>
+                    <div class="flex items-center gap-2 p-2 rounded-lg bg-slate-900/60 border border-slate-800/80">
+                        <i class="fa-solid {{ 'fa-circle-check text-emerald-400' if chk.get('som') else 'fa-circle-xmark text-slate-600' }}"></i>
+                        <span class="{{ 'text-slate-200 font-medium' if chk.get('som') else 'text-slate-500' }}">Som / Multimídia</span>
+                    </div>
+                </div>
+
+                {% if chk.get('pertences_descricao') %}
+                <div class="pt-2 border-t border-slate-800/80 text-xs">
+                    <span class="text-slate-400 font-semibold block mb-0.5">Pertences deixados:</span>
+                    <p class="text-slate-300">{{ chk.get('pertences_descricao') }}</p>
+                </div>
+                {% endif %}
+
+                {% if chk.get('avarias_descricao') %}
+                <div class="pt-2 border-t border-slate-800/80 text-xs">
+                    <span class="text-slate-400 font-semibold block mb-0.5">Avarias na lataria:</span>
+                    <p class="text-amber-400/90">{{ chk.get('avarias_descricao') }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: Adicionar Serviço -->
+<div id="modal-servico" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm hidden">
+    <div class="glass-panel p-6 rounded-2xl w-full max-w-lg border border-slate-700 shadow-2xl space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <h3 class="text-sm font-bold text-slate-100 flex items-center gap-2">
+                <i class="fa-solid fa-wrench text-brand-400"></i> Lançar Serviço na OS
+            </h3>
+            <button onclick="document.getElementById('modal-servico').classList.add('hidden')" class="text-slate-400 hover:text-white text-sm">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <form method="POST" action="{{ url_for('os.adicionar_servico', id=os.id) }}" class="space-y-4">
+            <div>
+                <label for="servico_id" class="block text-xs font-semibold text-slate-300 mb-1">Serviço Cadastrado <span class="text-rose-400">*</span></label>
+                <select id="servico_id" name="servico_id" required onchange="atualizarPrecoServico(this)"
+                        class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-slate-100 focus:ring-brand-500">
+                    <option value="">Selecione o serviço...</option>
+                    {% for s in servicos_disponiveis %}
+                        <option value="{{ s.id }}" data-preco="{{ s.preco_padrao }}">{{ s.nome }} (R$ {{ "%.2f"|format(s.preco_padrao) }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label for="mecanico_id" class="block text-xs font-semibold text-slate-300 mb-1">Mecânico / Responsável</label>
+                <select id="mecanico_id" name="mecanico_id"
+                        class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-slate-100 focus:ring-brand-500">
+                    <option value="">Selecione o mecânico...</option>
+                    {% for m in mecanicos %}
+                        <option value="{{ m.id }}">{{ m.nome }} ({{ m.cargo or 'Mecânico' }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="grid grid-cols-3 gap-3">
+                <div>
+                    <label for="srv_valor" class="block text-xs font-semibold text-slate-300 mb-1">Valor Unit. (R$)</label>
+                    <input type="number" step="0.01" id="srv_valor" name="valor_unitario" placeholder="0.00" required
+                           class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-slate-100">
+                </div>
+                <div>
+                    <label for="srv_qtd" class="block text-xs font-semibold text-slate-300 mb-1">Quantidade</label>
+                    <input type="number" step="0.5" id="srv_qtd" name="quantidade" value="1" required
+                           class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-slate-100">
+                </div>
+                <div>
+                    <label for="srv_desc" class="block text-xs font-semibold text-slate-300 mb-1">Desconto (R$)</label>
+                    <input type="number" step="0.01" id="srv_desc" name="desconto" value="0.00"
+                           class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-slate-100">
+                </div>
+            </div>
+
+            <div>
+                <label for="srv_obs" class="block text-xs font-semibold text-slate-300 mb-1">Observações do Serviço</label>
+                <input type="text" id="srv_obs" name="observacoes" placeholder="Ex: Substituído lado direito..."
+                       class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-slate-100">
+            </div>
+
+            <div class="flex justify-end gap-2 pt-2 border-t border-slate-800">
+                <button type="button" onclick="document.getElementById('modal-servico').classList.add('hidden')"
+                        class="px-4 py-2 rounded-xl border border-slate-700 text-slate-300 text-xs font-semibold hover:bg-slate-800">
+                    Cancelar
+                </button>
+                <button type="submit"
+                        class="px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold shadow">
+                    Lançar Serviço
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL: Adicionar Peça -->
+<div id="modal-peca" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm hidden">
+    <div class="glass-panel p-6 rounded-2xl w-full max-w-lg border border-slate-700 shadow-2xl space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <h3 class="text-sm font-bold text-slate-100 flex items-center gap-2">
+                <i class="fa-solid fa-gears text-indigo-400"></i> Lançar Peça na OS
+            </h3>
+            <button onclick="document.getElementById('modal-peca').classList.add('hidden')" class="text-slate-400 hover:text-white text-sm">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <form method="POST" action="{{ url_for('os.adicionar_peca', id=os.id) }}" class="space-y-4">
+            <div>
+                <label for="peca_id" class="block text-xs font-semibold text-slate-300 mb-1">Peça do Estoque <span class="text-rose-400">*</span></label>
+                <select id="peca_id" name="peca_id" required onchange="atualizarPrecoPeca(this)"
+                        class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-slate-100 focus:ring-indigo-500">
+                    <option value="">Selecione a peça...</option>
+                    {% for p in pecas_disponiveis %}
+                        <option value="{{ p.id }}" data-preco="{{ p.preco_venda }}" data-estoque="{{ p.estoque_atual }}">
+                            {{ p.nome }} (Estoque: {{ p.estoque_atual }} | R$ {{ "%.2f"|format(p.preco_venda) }})
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="grid grid-cols-3 gap-3">
+                <div>
+                    <label for="pca_valor" class="block text-xs font-semibold text-slate-300 mb-1">Valor Unit. (R$)</label>
+                    <input type="number" step="0.01" id="pca_valor" name="valor_unitario" placeholder="0.00" required
+                           class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-slate-100">
+                </div>
+                <div>
+                    <label for="pca_qtd" class="block text-xs font-semibold text-slate-300 mb-1">Quantidade</label>
+                    <input type="number" step="1" id="pca_qtd" name="quantidade" value="1" min="1" required
+                           class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-slate-100">
+                </div>
+                <div>
+                    <label for="pca_desc" class="block text-xs font-semibold text-slate-300 mb-1">Desconto (R$)</label>
+                    <input type="number" step="0.01" id="pca_desc" name="desconto" value="0.00"
+                           class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-slate-100">
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-2 pt-2 border-t border-slate-800">
+                <button type="button" onclick="document.getElementById('modal-peca').classList.add('hidden')"
+                        class="px-4 py-2 rounded-xl border border-slate-700 text-slate-300 text-xs font-semibold hover:bg-slate-800">
+                    Cancelar
+                </button>
+                <button type="submit"
+                        class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow">
+                    Lançar Peça
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL: Alterar Status da OS -->
+<div id="modal-status" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm hidden">
+    <div class="glass-panel p-6 rounded-2xl w-full max-w-md border border-slate-700 shadow-2xl space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <h3 class="text-sm font-bold text-slate-100 flex items-center gap-2">
+                <i class="fa-solid fa-arrows-rotate text-brand-400"></i> Atualizar Status da OS
+            </h3>
+            <button onclick="document.getElementById('modal-status').classList.add('hidden')" class="text-slate-400 hover:text-white text-sm">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <form method="POST" action="{{ url_for('os.alterar_status', id=os.id) }}" class="space-y-4">
+            <div>
+                <label for="novo_status" class="block text-xs font-semibold text-slate-300 mb-1.5">Novo Status</label>
+                <select id="novo_status" name="status" required
+                        class="w-full px-3 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-slate-100 focus:ring-brand-500">
+                    <option value="ABERTA" {% if os.status == 'ABERTA' %}selected{% endif %}>Aberta</option>
+                    <option value="ORCAMENTO" {% if os.status == 'ORCAMENTO' %}selected{% endif %}>Orçamento</option>
+                    <option value="APROVADA" {% if os.status == 'APROVADA' %}selected{% endif %}>Aprovada</option>
+                    <option value="EM_ANDAMENTO" {% if os.status == 'EM_ANDAMENTO' %}selected{% endif %}>Em Andamento</option>
+                    <option value="AGUARDANDO_PECAS" {% if os.status == 'AGUARDANDO_PECAS' %}selected{% endif %}>Aguardando Peças</option>
+                    <option value="CONCLUIDA" {% if os.status == 'CONCLUIDA' %}selected{% endif %}>Concluída (Baixa Estoque Automática)</option>
+                    <option value="ENTREGUE" {% if os.status == 'ENTREGUE' %}selected{% endif %}>Entregue</option>
+                    <option value="CANCELADA" {% if os.status == 'CANCELADA' %}selected{% endif %}>Cancelada (Estorno de Estoque)</option>
+                </select>
+                <p class="text-[11px] text-slate-400 mt-2 bg-slate-900/80 p-2.5 rounded-lg border border-slate-800">
+                    <i class="fa-solid fa-circle-info text-brand-400 mr-1"></i> Ao marcar como <b>Concluída</b> ou <b>Entregue</b>, as peças lançadas terão baixa automática no estoque.
+                </p>
+            </div>
+
+            <div class="flex justify-end gap-2 pt-2 border-t border-slate-800">
+                <button type="button" onclick="document.getElementById('modal-status').classList.add('hidden')"
+                        class="px-4 py-2 rounded-xl border border-slate-700 text-slate-300 text-xs font-semibold hover:bg-slate-800">
+                    Cancelar
+                </button>
+                <button type="submit"
+                        class="px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold shadow">
+                    Confirmar Mudança
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function atualizarPrecoServico(select) {
+    const opt = select.options[select.selectedIndex];
+    const preco = opt.getAttribute('data-preco');
+    if (preco) {
+        document.getElementById('srv_valor').value = parseFloat(preco).toFixed(2);
+    }
+}
+
+function atualizarPrecoPeca(select) {
+    const opt = select.options[select.selectedIndex];
+    const preco = opt.getAttribute('data-preco');
+    if (preco) {
+        document.getElementById('pca_valor').value = parseFloat(preco).toFixed(2);
+    }
+}
+</script>
+{% endblock %}

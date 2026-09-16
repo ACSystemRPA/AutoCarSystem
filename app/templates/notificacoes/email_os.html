@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin:0; padding:0; font-family:Arial,Helvetica,sans-serif; background:#f8fafc;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:600px; margin:20px auto; background:#ffffff; border-radius:8px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+        <tr>
+            <td style="background:#4f46e5; padding:20px; text-align:center;">
+                <h1 style="margin:0; color:#ffffff; font-size:22px;">{{ empresa.nome_fantasia or empresa.razao_social }}</h1>
+                <p style="margin:5px 0 0; color:#e0e7ff; font-size:13px;">{{ os.numero_os }} — {% if os.tipo == 'ORCAMENTO' %}Orçamento{% else %}Ordem de Serviço{% endif %}</p>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding:24px 24px 8px;">
+                <p style="margin:0 0 8px; font-size:14px; color:#1e293b;">Olá <strong>{{ os.cliente.nome }}</strong>,</p>
+                <p style="margin:0 0 16px; font-size:14px; color:#475569;">
+                    Segue em anexo o {% if os.tipo == 'ORCAMENTO' %}orçamento{% else %}detalhamento{% endif %} da <strong>{{ os.numero_os }}</strong> referente ao seu veículo <strong>{{ os.veiculo.modelo if os.veiculo else '—' }}{% if os.veiculo and os.veiculo.placa %} ({{ os.veiculo.placa }}){% endif %}</strong>.
+                </p>
+
+                {% if os.defeito_reclamado %}
+                <div style="background:#fef3c7; border-left:3px solid #f59e0b; padding:12px; margin:16px 0; font-size:13px; color:#92400e;">
+                    <strong>Defeito relatado:</strong> {{ os.defeito_reclamado }}
+                </div>
+                {% endif %}
+
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="font-size:13px; color:#334155;">
+                    <tr>
+                        <td style="padding:8px 0; font-weight:bold; color:#64748b; width:120px;">Valor Total:</td>
+                        <td style="padding:8px 0; font-size:18px; font-weight:bold; color:#4f46e5; text-align:right;">R$ {{ "%.2f"|format(os.valor_total) }}</td>
+                    </tr>
+                    {% if os.desconto and os.desconto > 0 %}
+                    <tr>
+                        <td style="padding:4px 0;">Desconto:</td>
+                        <td style="padding:4px 0; text-align:right; color:#ef4444;">- R$ {{ "%.2f"|format(os.desconto) }}</td>
+                    </tr>
+                    {% endif %}
+                </table>
+
+                <p style="margin:20px 0 0; font-size:13px; color:#64748b;">Status atual: <strong>{{ os.status.replace('_',' ').title() }}</strong></p>
+            </td>
+        </tr>
+        <tr>
+            <td style="background:#f1f5f9; padding:16px 24px; border-top:1px solid #e2e8f0; text-align:center;">
+                <p style="margin:0 0 8px; font-size:12px; color:#64748b;">
+                    {% if empresa.telefone %}📞 {{ empresa.telefone }} &nbsp;|{% endif %}
+                    {% if empresa.cidade %} 📍 {{ empresa.cidade }}{% endif %}
+                </p>
+                <p style="margin:0; font-size:11px; color:#94a3b8;">Este e-mail foi enviado automaticamente pelo AutoCarSystem. Não responda a esta mensagem.</p>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

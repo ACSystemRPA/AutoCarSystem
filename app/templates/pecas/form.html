@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}{% if peca %}Editar Peça{% else %}Nova Peça{% endif %}{% endblock %}
+{% block header_title %}{% if peca %}Editar Peça: {{ peca.nome }}{% else %}Cadastrar Nova Peça no Estoque{% endif %}{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto space-y-6">
+    <div class="flex items-center justify-between">
+        <a href="{{ url_for('pecas.index') }}" class="inline-flex items-center gap-2 text-xs font-medium text-slate-400 hover:text-slate-200 transition-colors">
+            <i class="fa-solid fa-arrow-left"></i>
+            <span>Voltar para a listagem</span>
+        </a>
+    </div>
+
+    <div class="glass-panel rounded-2xl p-8 shadow-2xl border border-slate-800">
+        <form method="POST" class="space-y-6">
+            <!-- Dados Principais -->
+            <div>
+                <h3 class="text-sm font-bold text-slate-200 uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-tag text-brand-400"></i>
+                    <span>Identificação do Produto</span>
+                </h3>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Descrição / Nome da Peça *</label>
+                        <input type="text" name="nome" value="{{ peca.nome if peca else '' }}" required placeholder="Ex: Filtro de Óleo Motor EA211"
+                               class="w-full px-4 py-2.5 bg-slate-900 border border-slate-700/80 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Código / SKU / Part Number</label>
+                        <input type="text" name="codigo" value="{{ peca.codigo if peca else '' }}" placeholder="Ex: W712/95"
+                               class="w-full px-4 py-2.5 bg-slate-900 border border-slate-700/80 rounded-xl text-sm font-mono text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Marca / Fabricante</label>
+                        <input type="text" name="marca" value="{{ peca.marca if peca else '' }}" placeholder="Ex: Mann Filter, Bosch"
+                               class="w-full px-4 py-2.5 bg-slate-900 border border-slate-700/80 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Categoria / Grupo</label>
+                        <input type="text" name="categoria" value="{{ peca.categoria if peca else '' }}" placeholder="Ex: Filtros, Freios, Suspensão"
+                               class="w-full px-4 py-2.5 bg-slate-900 border border-slate-700/80 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Localização no Estoque</label>
+                        <input type="text" name="localizacao" value="{{ peca.localizacao if peca else '' }}" placeholder="Ex: Prateleira B3, Gaveta 2"
+                               class="w-full px-4 py-2.5 bg-slate-900 border border-slate-700/80 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controle de Quantidade e Estoque -->
+            <div class="pt-4 border-t border-slate-800">
+                <h3 class="text-sm font-bold text-slate-200 uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-boxes-stacked text-brand-400"></i>
+                    <span>Estoque & Unidades</span>
+                </h3>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Quantidade em Estoque</label>
+                        <input type="number" step="0.01" name="estoque_atual" value="{{ peca.estoque_atual if peca else '0' }}" min="0"
+                               class="w-full px-4 py-2.5 bg-slate-900 border border-slate-700/80 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Estoque Mínimo de Alerta</label>
+                        <input type="number" step="0.01" name="estoque_minimo" value="{{ peca.estoque_minimo if peca else '2' }}" min="0"
+                               class="w-full px-4 py-2.5 bg-slate-900 border border-slate-700/80 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Unidade de Medida</label>
+                        <select name="unidade" class="w-full px-4 py-2.5 bg-slate-900 border border-slate-700/80 rounded-xl text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all">
+                            <option value="UN" {% if peca and peca.unidade == 'UN' %}selected{% endif %}>UN (Unidade)</option>
+                            <option value="PC" {% if peca and peca.unidade == 'PC' %}selected{% endif %}>PC (Peça)</option>
+                            <option value="LT" {% if peca and peca.unidade == 'LT' %}selected{% endif %}>LT (Litro)</option>
+                            <option value="KG" {% if peca and peca.unidade == 'KG' %}selected{% endif %}>KG (Quilo)</option>
+                            <option value="PAR" {% if peca and peca.unidade == 'PAR' %}selected{% endif %}>PAR (Par)</option>
+                            <option value="JG" {% if peca and peca.unidade == 'JG' %}selected{% endif %}>JG (Jogo/Kit)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preços & Financeiro -->
+            <div class="pt-4 border-t border-slate-800">
+                <h3 class="text-sm font-bold text-slate-200 uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-dollar-sign text-brand-400"></i>
+                    <span>Preços & Margem</span>
+                </h3>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Preço de Custo (R$) *</label>
+                        <input type="text" id="preco_custo" name="preco_custo" value="{{ '{:.2f}'.format(peca.preco_custo) if peca else '0,00' }}" required
+                               class="w-full px-4 py-2.5 bg-slate-900 border border-slate-700/80 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Preço de Venda (R$) *</label>
+                        <input type="text" id="preco_venda" name="preco_venda" value="{{ '{:.2f}'.format(peca.preco_venda) if peca else '0,00' }}" required
+                               class="w-full px-4 py-2.5 bg-slate-900 border border-slate-700/80 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Fornecedor Habitual</label>
+                        <input type="text" name="fornecedor" value="{{ peca.fornecedor if peca else '' }}" placeholder="Ex: Distribuidora AutoZone"
+                               class="w-full px-4 py-2.5 bg-slate-900 border border-slate-700/80 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botões -->
+            <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
+                <a href="{{ url_for('pecas.index') }}" class="px-5 py-2.5 rounded-xl border border-slate-700 text-sm font-semibold text-slate-300 hover:bg-slate-800 transition-colors">
+                    Cancelar
+                </a>
+                <button type="submit" class="px-6 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-sm font-semibold shadow-lg shadow-brand-600/30 transition-all">
+                    {% if peca %}Salvar Alterações{% else %}Cadastrar Peça{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

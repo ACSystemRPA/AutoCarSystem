@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}Cliente: {{ cliente.nome }}{% endblock %}
+{% block header_title %}Perfil do Cliente: {{ cliente.nome }}{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Top Action Bar -->
+    <div class="flex items-center justify-between">
+        <a href="{{ url_for('clientes.index') }}" class="inline-flex items-center gap-2 text-xs font-medium text-slate-400 hover:text-slate-200 transition-colors">
+            <i class="fa-solid fa-arrow-left"></i>
+            <span>Voltar para a listagem</span>
+        </a>
+        <div class="flex items-center gap-3">
+            <a href="{{ url_for('clientes.editar', id=cliente.id) }}" class="inline-flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl border border-slate-700 transition-all">
+                <i class="fa-solid fa-pen"></i>
+                <span>Editar Dados</span>
+            </a>
+            <a href="{{ url_for('veiculos.novo', cliente_id=cliente.id) }}" class="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold rounded-xl shadow-lg shadow-brand-600/30 transition-all">
+                <i class="fa-solid fa-car"></i>
+                <span>Vincular Novo Veículo</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Overview Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Client Profile Card -->
+        <div class="glass-panel rounded-2xl p-6 border border-slate-800 space-y-6">
+            <div class="flex items-center gap-4">
+                <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-brand-600 to-indigo-600 flex items-center justify-center font-bold text-xl text-white shadow-lg shadow-brand-600/20">
+                    {{ cliente.nome[:2].upper() }}
+                </div>
+                <div>
+                    <h2 class="text-base font-bold text-white">{{ cliente.nome }}</h2>
+                    <p class="text-xs text-slate-400">Cliente desde {{ cliente.data_cadastro.strftime('%d/%m/%Y') }}</p>
+                </div>
+            </div>
+
+            <div class="space-y-3 pt-4 border-t border-slate-800/80 text-xs">
+                <div class="flex justify-between py-1 border-b border-slate-800/40">
+                    <span class="text-slate-400">CPF / CNPJ</span>
+                    <span class="text-slate-200 font-medium">{{ cliente.cpf_cnpj or 'Não informado' }}</span>
+                </div>
+                <div class="flex justify-between py-1 border-b border-slate-800/40">
+                    <span class="text-slate-400">Telefone / WhatsApp</span>
+                    <span class="text-slate-200 font-medium">{{ cliente.telefone or 'Não informado' }}</span>
+                </div>
+                <div class="flex justify-between py-1 border-b border-slate-800/40">
+                    <span class="text-slate-400">E-mail</span>
+                    <span class="text-slate-200 font-medium">{{ cliente.email or 'Não informado' }}</span>
+                </div>
+                <div class="flex justify-between py-1 border-b border-slate-800/40">
+                    <span class="text-slate-400">Cidade</span>
+                    <span class="text-slate-200 font-medium">{{ cliente.cidade or 'Não informada' }}</span>
+                </div>
+                <div class="flex justify-between py-1 border-b border-slate-800/40">
+                    <span class="text-slate-400">Endereço</span>
+                    <span class="text-slate-200 font-medium">{{ cliente.endereco or 'Não informado' }}</span>
+                </div>
+            </div>
+
+            {% if cliente.observacoes %}
+            <div class="pt-2">
+                <p class="text-xs font-semibold text-slate-400 mb-1">Observações:</p>
+                <div class="p-3 rounded-xl bg-slate-900/60 border border-slate-800 text-xs text-slate-300">
+                    {{ cliente.observacoes }}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Vehicles List Card -->
+        <div class="lg:col-span-2 glass-panel rounded-2xl p-6 border border-slate-800 space-y-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-car text-brand-400"></i>
+                        <span>Veículos Registrados ({{ veiculos|length }})</span>
+                    </h3>
+                    <p class="text-xs text-slate-400">Histórico de automóveis vinculados a este cliente</p>
+                </div>
+                <a href="{{ url_for('veiculos.novo', cliente_id=cliente.id) }}" class="text-xs font-semibold text-brand-400 hover:text-brand-300">
+                    + Adicionar
+                </a>
+            </div>
+
+            {% if veiculos %}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                {% for v in veiculos %}
+                <div class="p-4 rounded-xl bg-slate-900/70 border border-slate-800 hover:border-slate-700 transition-all flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="px-2.5 py-1 rounded-md bg-brand-500/10 border border-brand-500/20 text-brand-400 font-mono font-bold text-xs uppercase tracking-wider">
+                                {{ v.placa }}
+                            </span>
+                            <span class="text-xs text-slate-500">{{ v.ano or '' }}</span>
+                        </div>
+                        <h4 class="text-sm font-semibold text-white">{{ v.marca }} {{ v.modelo }}</h4>
+                        <div class="flex items-center gap-3 text-xs text-slate-400 mt-2">
+                            {% if v.cor %}<span><i class="fa-solid fa-palette text-slate-600 mr-1"></i>{{ v.cor }}</span>{% endif %}
+                            {% if v.km_atual %}<span><i class="fa-solid fa-gauge text-slate-600 mr-1"></i>{{ "{:,}".format(v.km_atual).replace(',', '.') }} km</span>{% endif %}
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-end gap-2 pt-4 mt-3 border-t border-slate-800/60">
+                        <a href="{{ url_for('veiculos.editar', id=v.id) }}" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs">
+                            <i class="fa-solid fa-pen"></i>
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="py-12 text-center rounded-xl bg-slate-900/30 border border-slate-800/50">
+                <i class="fa-solid fa-car-side text-3xl text-slate-600 mb-3"></i>
+                <p class="text-xs text-slate-400 font-medium">Nenhum veículo vinculado a este cliente.</p>
+                <a href="{{ url_for('veiculos.novo', cliente_id=cliente.id) }}" class="mt-3 inline-block px-4 py-2 bg-slate-800 hover:bg-slate-700 text-brand-400 rounded-lg text-xs font-semibold transition-all">
+                    Cadastrar primeiro veículo
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
