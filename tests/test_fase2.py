@@ -17,7 +17,7 @@ class Fase2TestCase(unittest.TestCase):
         db.create_all()
         
         # Setup Empresas e Usuários de teste
-        self.emp1 = Empresa(razao_social="Alpha Motors Ltda", nome_fantasia="Oficina Alpha Motors", cnpj="11.111.111/0001-11")
+        self.emp1 = Empresa(razao_social="Alpha Motors Ltda", nome_fantasia="Oficina Alpha Motors", nif="11.111.111/0001-11")
         db.session.add(self.emp1)
         db.session.flush()
         
@@ -25,7 +25,7 @@ class Fase2TestCase(unittest.TestCase):
         self.user1.set_password("senha123")
         db.session.add(self.user1)
 
-        self.emp2 = Empresa(razao_social="Beta Car Ltda", nome_fantasia="Oficina Beta Car", cnpj="22.222.222/0001-22")
+        self.emp2 = Empresa(razao_social="Beta Car Ltda", nome_fantasia="Oficina Beta Car", nif="22.222.222/0001-22")
         db.session.add(self.emp2)
         db.session.flush()
         
@@ -51,7 +51,7 @@ class Fase2TestCase(unittest.TestCase):
         
         res = self.client.post('/clientes/novo', data={
             'nome': 'João Silva',
-            'cpf_cnpj': '123.456.789-00',
+            'nif': '123.456.789-00',
             'telefone': '11999998888',
             'email': 'joao@gmail.com',
             'endereco': 'Rua das Flores, 123',
@@ -60,7 +60,7 @@ class Fase2TestCase(unittest.TestCase):
         }, follow_redirects=True)
         self.assertEqual(res.status_code, 200)
         
-        cliente_emp1 = Cliente.query.filter_by(cpf_cnpj='123.456.789-00').first()
+        cliente_emp1 = Cliente.query.filter_by(nif='123.456.789-00').first()
         self.assertIsNotNone(cliente_emp1)
         self.assertEqual(cliente_emp1.empresa_id, self.emp1.id)
         cliente_id = cliente_emp1.id
@@ -74,7 +74,7 @@ class Fase2TestCase(unittest.TestCase):
         res_detalhes = self.client.get(f'/clientes/{cliente_id}')
         self.assertEqual(res_detalhes.status_code, 404)
         
-        res_edit = self.client.post(f'/clientes/{cliente_id}/editar', data={'nome': 'Hacker', 'cpf_cnpj': '123'}, follow_redirects=True)
+        res_edit = self.client.post(f'/clientes/{cliente_id}/editar', data={'nome': 'Hacker', 'nif': '123'}, follow_redirects=True)
         self.assertEqual(res_edit.status_code, 404)
 
     def test_veiculos_crud_and_link_cliente(self):
@@ -82,10 +82,10 @@ class Fase2TestCase(unittest.TestCase):
         
         self.client.post('/clientes/novo', data={
             'nome': 'Maria Oliveira',
-            'cpf_cnpj': '987.654.321-11'
+            'nif': '987.654.321-11'
         }, follow_redirects=True)
         
-        cliente = Cliente.query.filter_by(cpf_cnpj='987.654.321-11').first()
+        cliente = Cliente.query.filter_by(nif='987.654.321-11').first()
         cliente_id = cliente.id
 
         res = self.client.post('/veiculos/novo', data={

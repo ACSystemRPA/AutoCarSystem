@@ -19,7 +19,7 @@ class Fase3TestCase(unittest.TestCase):
         db.create_all()
         
         # Setup Empresa 1 (Alpha) e Empresa 2 (Beta)
-        self.emp1 = Empresa(razao_social="Alpha Motors Ltda", nome_fantasia="Oficina Alpha Motors", cnpj="11.111.111/0001-11")
+        self.emp1 = Empresa(razao_social="Alpha Motors Ltda", nome_fantasia="Oficina Alpha Motors", nif="11.111.111/0001-11")
         db.session.add(self.emp1)
         db.session.flush()
         
@@ -31,15 +31,15 @@ class Fase3TestCase(unittest.TestCase):
         self.mecanico1.set_password("senha123")
         db.session.add(self.mecanico1)
 
-        self.cli1 = Cliente(empresa_id=self.emp1.id, nome="Marcos Souza", cpf_cnpj="111.222.333-44", telefone="11988887777")
+        self.cli1 = Cliente(empresa_id=self.emp1.id, nome="Marcos Souza", nif="111.222.333-44", telefone="11988887777")
         db.session.add(self.cli1)
         db.session.flush()
 
         self.veic1 = Veiculo(empresa_id=self.emp1.id, cliente_id=self.cli1.id, placa="ABC1D23", marca="Honda", modelo="Civic 2.0", ano_fabricacao=2020, ano_modelo=2021)
         db.session.add(self.veic1)
 
-        self.peca1 = Peca(empresa_id=self.emp1.id, descricao="Óleo Motor 5W30 Sintético", codigo_interno="OLEO-5W30", preco_custo=25.00, preco_venda=45.00, quantidade_estoque=20, estoque_minimo=5)
-        self.peca2 = Peca(empresa_id=self.emp1.id, descricao="Filtro de Óleo", codigo_interno="FIL-01", preco_custo=15.00, preco_venda=35.00, quantidade_estoque=10, estoque_minimo=2)
+        self.peca1 = Peca(empresa_id=self.emp1.id, descricao="Óleo Motor 5W30 Sintético", codigo_referencia="OLEO-5W30", preco_custo=25.00, preco_venda=45.00, estoque_atual=20, estoque_minimo=5)
+        self.peca2 = Peca(empresa_id=self.emp1.id, descricao="Filtro de Óleo", codigo_referencia="FIL-01", preco_custo=15.00, preco_venda=35.00, estoque_atual=10, estoque_minimo=2)
         db.session.add_all([self.peca1, self.peca2])
 
         self.serv1 = Servico(empresa_id=self.emp1.id, descricao="Troca de Óleo e Filtros", preco_padrao=80.00, tempo_estimado_minutos=30)
@@ -47,7 +47,7 @@ class Fase3TestCase(unittest.TestCase):
         db.session.add_all([self.serv1, self.serv2])
 
         # Empresa 2
-        self.emp2 = Empresa(razao_social="Beta Car Ltda", nome_fantasia="Oficina Beta Car", cnpj="22.222.222/0001-22")
+        self.emp2 = Empresa(razao_social="Beta Car Ltda", nome_fantasia="Oficina Beta Car", nif="22.222.222/0001-22")
         db.session.add(self.emp2)
         db.session.flush()
         
@@ -55,7 +55,7 @@ class Fase3TestCase(unittest.TestCase):
         self.user2.set_password("senha123")
         db.session.add(self.user2)
 
-        self.cli2 = Cliente(empresa_id=self.emp2.id, nome="Fernanda Lima", cpf_cnpj="999.888.777-66")
+        self.cli2 = Cliente(empresa_id=self.emp2.id, nome="Fernanda Lima", nif="999.888.777-66")
         db.session.add(self.cli2)
         db.session.flush()
 
@@ -212,7 +212,7 @@ class Fase3TestCase(unittest.TestCase):
 
         # Verificar que antes de concluir o estoque ainda é 20
         db.session.refresh(self.peca1)
-        self.assertEqual(self.peca1.quantidade_estoque, 20)
+        self.assertEqual(self.peca1.estoque_atual, 20)
 
         # Mudar status para CONCLUIDA -> deve dar baixa de 4 unidades no estoque (20 - 4 = 16)
         res_status = self.client.post(f'/os/{os.id}/alterar-status', data={
@@ -222,7 +222,7 @@ class Fase3TestCase(unittest.TestCase):
 
         db.session.refresh(self.peca1)
         db.session.refresh(os)
-        self.assertEqual(self.peca1.quantidade_estoque, 16)
+        self.assertEqual(self.peca1.estoque_atual, 16)
         self.assertEqual(os.status, 'CONCLUIDA')
         self.assertIsNotNone(os.data_conclusao)
 
@@ -233,7 +233,7 @@ class Fase3TestCase(unittest.TestCase):
 
         db.session.refresh(self.peca1)
         db.session.refresh(os)
-        self.assertEqual(self.peca1.quantidade_estoque, 20)
+        self.assertEqual(self.peca1.estoque_atual, 20)
         self.assertEqual(os.status, 'CANCELADA')
 
     def test_multi_tenant_isolation(self):

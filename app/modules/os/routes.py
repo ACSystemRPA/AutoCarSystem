@@ -314,7 +314,7 @@ def adicionar_peca(id):
             if valor_unitario <= 0:
                 valor_unitario = peca.preco_venda
             # Alerta de stock insuficiente (não bloqueia para orçamentos, mas avisa)
-            if peca.quantidade_stock < quantidade:
+            if peca.quantidade_estoque < quantidade:
                 flash(f'Atenção: A peça "{peca.descricao}" possui apenas {peca.quantidade_stock} em stock.', 'warning')
                 
     if not descricao:
@@ -377,7 +377,7 @@ def alterar_status(id):
         # Baixa no stock das peças cadastradas
         for item in ordem.itens_pecas:
             if item.peca_id and item.peca:
-                item.peca.quantidade_stock = max(0.0, item.peca.quantidade_stock - item.quantidade)
+                item.peca.estoque_atual = max(0.0, item.peca.estoque_atual - item.quantidade)
                 
         flash(f'Status alterado para {novo_status} e stock de peças baixado com sucesso!', 'success')
         
@@ -385,7 +385,7 @@ def alterar_status(id):
         # Estorna peças de volta ao stock se a OS for cancelada após conclusão
         for item in ordem.itens_pecas:
             if item.peca_id and item.peca:
-                item.peca.quantidade_stock += item.quantidade
+                item.peca.estoque_atual += item.quantidade
         flash('Status alterado para CANCELADA e itens estornados ao stock.', 'warning')
     else:
         flash(f'Status da OS #{ordem.numero_os} atualizado para {novo_status}.', 'success')
@@ -403,7 +403,7 @@ def excluir(id):
     if ordem.status in ['CONCLUIDA', 'ENTREGUE']:
         for item in ordem.itens_pecas:
             if item.peca_id and item.peca:
-                item.peca.quantidade_stock += item.quantidade
+                item.peca.estoque_atual += item.quantidade
                 
     db.session.delete(ordem)
     db.session.commit()

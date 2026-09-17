@@ -23,9 +23,12 @@ class Fase1TestCase(unittest.TestCase):
     def test_company_registration_and_login(self):
         # Register new company
         res = self.client.post('/auth/register', data={
-            'razao_social': 'Auto Center Premium Ltda',
-            'nome_fantasia': 'Auto Center Premium',
-            'cnpj': '33.333.333/0001-33',
+            'razao_social': 'Auto Center Premium Lda',
+            'nome_comercial': 'Auto Center Premium',
+            'nif': '111111111',
+            'telefone': '+351900000000',
+            'concelho': 'Lisboa',
+            'nome_admin': 'Admin Master',
             'nome': 'Admin Master',
             'email': 'admin@premium.com',
             'senha': 'Password@123',
@@ -34,9 +37,9 @@ class Fase1TestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
 
         # Verify company and user in DB
-        empresa = Empresa.query.filter_by(cnpj='33.333.333/0001-33').first()
+        empresa = Empresa.query.filter_by(nif='111111111').first()
         self.assertIsNotNone(empresa)
-        self.assertEqual(empresa.razao_social, 'Auto Center Premium Ltda')
+        self.assertEqual(empresa.razao_social, 'Auto Center Premium Lda')
 
         user = Usuario.query.filter_by(email='admin@premium.com').first()
         self.assertIsNotNone(user)
