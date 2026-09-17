@@ -1,4 +1,4 @@
-from flask import render_template, redirect, url_for, flash, request, jsonify
+from flask import render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
 from app.extensions import db
 from app.models import Cliente, Veiculo
@@ -13,7 +13,7 @@ def index():
     if busca:
         query = query.filter(
             (Cliente.nome.ilike(f'%{busca}%')) |
-            (Cliente.cpf_cnpj.ilike(f'%{busca}%')) |
+            (Cliente.nif.ilike(f'%{busca}%')) |
             (Cliente.telefone.ilike(f'%{busca}%')) |
             (Cliente.email.ilike(f'%{busca}%'))
         )
@@ -27,11 +27,14 @@ def index():
 def novo():
     if request.method == 'POST':
         nome = request.form.get('nome', '').strip()
-        cpf_cnpj = request.form.get('cpf_cnpj', '').strip()
+        nif = request.form.get('nif', '').strip()
         telefone = request.form.get('telefone', '').strip()
         email = request.form.get('email', '').strip()
+        codigo_postal = request.form.get('codigo_postal', '').strip()
         endereco = request.form.get('endereco', '').strip()
-        cidade = request.form.get('cidade', '').strip()
+        localidade = request.form.get('localidade', '').strip()
+        concelho = request.form.get('concelho', '').strip()
+        distrito = request.form.get('distrito', '').strip()
         observacoes = request.form.get('observacoes', '').strip()
 
         if not nome:
@@ -41,17 +44,20 @@ def novo():
         novo_cliente = Cliente(
             empresa_id=current_user.empresa_id,
             nome=nome,
-            cpf_cnpj=cpf_cnpj,
+            nif=nif,
             telefone=telefone,
             email=email,
+            codigo_postal=codigo_postal,
             endereco=endereco,
-            cidade=cidade,
+            localidade=localidade,
+            cidade=concelho,
+            distrito=distrito,
             observacoes=observacoes
         )
         
         db.session.add(novo_cliente)
         db.session.commit()
-        flash(f'Cliente "{nome}" cadastrado com sucesso!', 'success')
+        flash(f'Cliente "{nome}" registado com sucesso!', 'success')
         return redirect(url_for('clientes.detalhes', id=novo_cliente.id))
 
     return render_template('clientes/form.html', cliente=None)
@@ -71,11 +77,14 @@ def editar(id):
     
     if request.method == 'POST':
         nome = request.form.get('nome', '').strip()
-        cpf_cnpj = request.form.get('cpf_cnpj', '').strip()
+        nif = request.form.get('nif', '').strip()
         telefone = request.form.get('telefone', '').strip()
         email = request.form.get('email', '').strip()
+        codigo_postal = request.form.get('codigo_postal', '').strip()
         endereco = request.form.get('endereco', '').strip()
-        cidade = request.form.get('cidade', '').strip()
+        localidade = request.form.get('localidade', '').strip()
+        concelho = request.form.get('concelho', '').strip()
+        distrito = request.form.get('distrito', '').strip()
         observacoes = request.form.get('observacoes', '').strip()
 
         if not nome:
@@ -83,11 +92,14 @@ def editar(id):
             return render_template('clientes/form.html', cliente=cliente)
 
         cliente.nome = nome
-        cliente.cpf_cnpj = cpf_cnpj
+        cliente.nif = nif
         cliente.telefone = telefone
         cliente.email = email
+        cliente.codigo_postal = codigo_postal
         cliente.endereco = endereco
-        cliente.cidade = cidade
+        cliente.localidade = localidade
+        cliente.cidade = concelho
+        cliente.distrito = distrito
         cliente.observacoes = observacoes
 
         db.session.commit()
@@ -104,5 +116,5 @@ def excluir(id):
     nome = cliente.nome
     db.session.delete(cliente)
     db.session.commit()
-    flash(f'Cliente "{nome}" e seus vínculos foram removidos com sucesso.', 'info')
+    flash(f'Cliente "{nome}" e as respetivas viaturas foram removidos com sucesso.', 'info')
     return redirect(url_for('clientes.index'))

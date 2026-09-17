@@ -11,16 +11,16 @@ def login():
     
     if request.method == 'POST':
         email = request.form.get('email', '').strip()
-        senha = request.form.get('senha', '')
+        palavra_passe = request.form.get('senha', '')
         lembrar = True if request.form.get('lembrar') else False
         
-        if not email or not senha:
+        if not email or not palavra_passe:
             flash('Por favor, preencha todos os campos.', 'warning')
             return render_template('auth/login.html')
         
         usuario = Usuario.query.filter_by(email=email).first()
-        if not usuario or not usuario.check_password(senha):
-            flash('Credenciais inválidas. Verifique seu e-mail e senha.', 'danger')
+        if not usuario or not usuario.check_password(palavra_passe):
+            flash('Credenciais inválidas. Verifique o seu e-mail e palavra-passe.', 'danger')
             return render_template('auth/login.html')
         
         login_user(usuario, remember=lembrar)
@@ -40,41 +40,41 @@ def register():
         
     if request.method == 'POST':
         razao_social = request.form.get('razao_social', '').strip()
-        nome_fantasia = request.form.get('nome_fantasia', '').strip()
-        cnpj = request.form.get('cnpj', '').strip() or None
+        nome_comercial = request.form.get('nome_comercial', '').strip()
+        nif = request.form.get('nif', '').strip() or None
         telefone = request.form.get('telefone', '').strip()
-        cidade = request.form.get('cidade', '').strip()
+        concelho = request.form.get('concelho', '').strip()
         
         nome = request.form.get('nome_admin', '').strip() or request.form.get('nome', '').strip()
         email = request.form.get('email', '').strip()
-        senha = request.form.get('senha', '')
+        palavra_passe = request.form.get('senha', '')
         
-        if not all([razao_social, nome, email, senha]):
+        if not all([razao_social, nome, email, palavra_passe]):
             flash('Preencha todos os campos obrigatórios marcados com (*).', 'warning')
             return render_template('auth/register.html')
             
-        if len(senha) < 6:
-            flash('A senha deve possuir no mínimo 6 caracteres.', 'warning')
+        if len(palavra_passe) < 6:
+            flash('A palavra-passe deve ter no mínimo 6 caracteres.', 'warning')
             return render_template('auth/register.html')
             
-        if cnpj and Empresa.query.filter_by(cnpj=cnpj).first():
-            flash('Já existe uma oficina cadastrada com este CNPJ/CPF.', 'danger')
+        if nif and Empresa.query.filter_by(nif=nif).first():
+            flash('Já existe uma oficina registada com este NIF.', 'danger')
             return render_template('auth/register.html')
             
         if Usuario.query.filter_by(email=email).first():
-            flash('Este e-mail já está em uso por outro usuário.', 'danger')
+            flash('Este e-mail já está em uso por outro utilizador.', 'danger')
             return render_template('auth/register.html')
             
         try:
             nova_empresa = Empresa(
                 razao_social=razao_social,
-                nome_fantasia=nome_fantasia or razao_social,
-                cnpj=cnpj,
+                nome_fantasia=nome_comercial or razao_social,
+                nif=nif,
                 telefone=telefone,
-                cidade=cidade
+                cidade=concelho
             )
             db.session.add(nova_empresa)
-            db.session.flush() # Gera o ID da empresa antes do commit
+            db.session.flush()
             
             novo_usuario = Usuario(
                 empresa_id=nova_empresa.id,
@@ -82,13 +82,13 @@ def register():
                 email=email,
                 papel='admin'
             )
-            novo_usuario.set_password(senha)
+            novo_usuario.set_password(palavra_passe)
             db.session.add(novo_usuario)
             
             db.session.commit()
             
             login_user(novo_usuario)
-            flash(f'Oficina "{nova_empresa.nome_fantasia}" criada com sucesso! Bem-vindo ao AutoCarSystem.', 'success')
+            flash(f'Oficina "{nova_empresa.nome_fantasia or nova_empresa.razao_social}" registada com sucesso! Bem-vindo ao AutoCarSystem.', 'success')
             return redirect(url_for('dashboard.index'))
             
         except Exception as e:
@@ -102,5 +102,5 @@ def register():
 @login_required
 def logout():
     logout_user()
-    flash('Você saiu do sistema com segurança.', 'info')
+    flash('Saiu do sistema com segurança.', 'info')
     return redirect(url_for('auth.login'))

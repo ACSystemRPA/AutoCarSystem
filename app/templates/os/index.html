@@ -15,19 +15,19 @@
             <div class="text-[11px] font-medium text-sky-400 flex items-center gap-1.5">
                 <span class="w-1.5 h-1.5 rounded-full bg-sky-400"></span> Abertas
             </div>
-            <div class="text-xs text-slate-400 mt-1">Aguardando análise</div>
+            <div class="text-xs text-slate-400 mt-1">A aguardar análise</div>
         </a>
         <a href="{{ url_for('os.index', status='EM_ANDAMENTO') }}" class="glass-panel p-3.5 rounded-xl border border-slate-800 hover:border-amber-500/40 transition-all group">
             <div class="text-[11px] font-medium text-amber-400 flex items-center gap-1.5">
                 <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> Em Execução
             </div>
-            <div class="text-xs text-slate-400 mt-1">Serviço na pista</div>
+            <div class="text-xs text-slate-400 mt-1">Serviço em curso</div>
         </a>
         <a href="{{ url_for('os.index', status='AGUARDANDO_PECAS') }}" class="glass-panel p-3.5 rounded-xl border border-slate-800 hover:border-orange-500/40 transition-all group">
             <div class="text-[11px] font-medium text-orange-400 flex items-center gap-1.5">
                 <span class="w-1.5 h-1.5 rounded-full bg-orange-400"></span> Peças
             </div>
-            <div class="text-xs text-slate-400 mt-1">Aguardando estoque</div>
+            <div class="text-xs text-slate-400 mt-1">A aguardar stock</div>
         </a>
         <a href="{{ url_for('os.index', status='CONCLUIDA') }}" class="glass-panel p-3.5 rounded-xl border border-slate-800 hover:border-emerald-500/40 transition-all group">
             <div class="text-[11px] font-medium text-emerald-400 flex items-center gap-1.5">
@@ -40,8 +40,7 @@
                 <span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span> Entregues
             </div>
             <div class="text-xs text-slate-400 mt-1">Finalizadas</div>
-        </a>
-    </div>
+        </a>    </div>
 
     <!-- Barra de Ações e Filtros -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -49,7 +48,7 @@
         <form method="GET" action="{{ url_for('os.index') }}" class="flex flex-1 flex-wrap sm:flex-nowrap items-center gap-3">
             <div class="relative flex-1 min-w-[240px]">
                 <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                <input type="text" name="busca" value="{{ busca }}" placeholder="Buscar por nº OS, placa, modelo ou cliente..."
+                <input type="text" name="busca" value="{{ busca }}" placeholder="Pesquisar por nº OS, matrícula, modelo ou cliente..."
                        class="w-full pl-10 pr-4 py-2.5 bg-slate-900/80 border border-slate-700/80 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all">
                 {% if busca %}
                     <a href="{{ url_for('os.index', status=status_filtro) }}" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white text-xs">
@@ -60,12 +59,12 @@
 
             <select name="status" onchange="this.form.submit()"
                     class="py-2.5 px-3 bg-slate-900/80 border border-slate-700/80 rounded-xl text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500/50">
-                <option value="">Todos os Status</option>
+                <option value="">Todos os Estados</option>
                 <option value="ABERTA" {% if status_filtro == 'ABERTA' %}selected{% endif %}>Aberta</option>
                 <option value="ORCAMENTO" {% if status_filtro == 'ORCAMENTO' %}selected{% endif %}>Orçamento</option>
                 <option value="APROVADA" {% if status_filtro == 'APROVADA' %}selected{% endif %}>Aprovada</option>
-                <option value="EM_ANDAMENTO" {% if status_filtro == 'EM_ANDAMENTO' %}selected{% endif %}>Em Andamento</option>
-                <option value="AGUARDANDO_PECAS" {% if status_filtro == 'AGUARDANDO_PECAS' %}selected{% endif %}>Aguardando Peças</option>
+                <option value="EM_ANDAMENTO" {% if status_filtro == 'EM_ANDAMENTO' %}selected{% endif %}>Em Curso</option>
+                <option value="AGUARDANDO_PECAS" {% if status_filtro == 'AGUARDANDO_PECAS' %}selected{% endif %}>A Aguardar Peças</option>
                 <option value="CONCLUIDA" {% if status_filtro == 'CONCLUIDA' %}selected{% endif %}>Concluída</option>
                 <option value="ENTREGUE" {% if status_filtro == 'ENTREGUE' %}selected{% endif %}>Entregue</option>
                 <option value="CANCELADA" {% if status_filtro == 'CANCELADA' %}selected{% endif %}>Cancelada</option>
@@ -92,8 +91,8 @@
                     <tr>
                         <th class="px-6 py-4">Nº OS</th>
                         <th class="px-6 py-4">Cliente</th>
-                        <th class="px-6 py-4">Veículo</th>
-                        <th class="px-6 py-4">Status</th>
+                        <th class="px-6 py-4">Viatura</th>
+                        <th class="px-6 py-4">Estado</th>
                         <th class="px-6 py-4">Abertura / Previsão</th>
                         <th class="px-6 py-4 text-right">Total</th>
                         <th class="px-6 py-4 text-right">Ações</th>
@@ -109,7 +108,7 @@
                         </td>
                         <td class="px-6 py-4 font-medium text-slate-100">
                             <div class="font-semibold text-slate-100">{{ os.cliente.nome }}</div>
-                            <div class="text-xs text-slate-400">{{ os.cliente.telefone or os.cliente.celular or 'Sem telefone' }}</div>
+                            <div class="text-xs text-slate-400">{{ os.cliente.telefone or 'Sem telefone' }}</div>
                         </td>
                         <td class="px-6 py-4 text-slate-300">
                             {% if os.veiculo %}
@@ -134,11 +133,11 @@
                             {% endif %}
                         </td>
                         <td class="px-6 py-4 text-right font-semibold text-slate-100 font-mono">
-                            R$ {{ "%.2f"|format(os.valor_total)|replace('.', ',') }}
+                            € {{ "%.2f"|format(os.valor_total)|replace('.', ',') }}
                         </td>
                         <td class="px-6 py-4 text-right">
                             <div class="flex items-center justify-end gap-2">
-                                <a href="{{ url_for('os.detalhes', id=os.id) }}" class="p-2 rounded-lg bg-slate-800 hover:bg-brand-600 hover:text-white text-slate-300 text-xs transition-colors" title="Gerenciar OS">
+                                <a href="{{ url_for('os.detalhes', id=os.id) }}" class="p-2 rounded-lg bg-slate-800 hover:bg-brand-600 hover:text-white text-slate-300 text-xs transition-colors" title="Gerir OS">
                                     <i class="fa-solid fa-arrow-right"></i>
                                 </a>
                                 <a href="{{ url_for('os.editar', id=os.id) }}" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white text-xs transition-colors" title="Editar Dados Básicos">

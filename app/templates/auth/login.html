@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Entrar no AutoCarSystem{% endblock %}
+{% block title %}Iniciar Sessão - AutoCarSystem{% endblock %}
 
 {% block public_content %}
 <div class="w-full max-w-md">
@@ -10,14 +10,14 @@
             <i class="fa-solid fa-car-wrench"></i>
         </div>
         <h1 class="text-2xl font-extrabold tracking-tight text-white">AutoCar<span class="text-brand-400">System</span></h1>
-        <p class="text-sm text-slate-400 mt-1">Gestão inteligente e multi-empresa para oficinas</p>
+        <p class="text-sm text-slate-400 mt-1">Gestão inteligente e multi-oficina para oficinas automóveis</p>
     </div>
 
     <!-- Login Card -->
     <div class="glass-panel p-8 rounded-2xl shadow-2xl border border-slate-800/80">
         <div class="mb-6">
-            <h2 class="text-xl font-bold text-white">Acessar Conta</h2>
-            <p class="text-xs text-slate-400 mt-0.5">Insira seu e-mail e senha para entrar no painel</p>
+            <h2 class="text-xl font-bold text-white">Iniciar Sessão</h2>
+            <p class="text-xs text-slate-400 mt-0.5">Insira o seu e-mail e palavra-passe para entrar no painel</p>
         </div>
 
         <form action="{{ url_for('auth.login') }}" method="POST" class="space-y-4">
@@ -27,14 +27,14 @@
                     <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                         <i class="fa-solid fa-envelope text-sm"></i>
                     </div>
-                    <input type="email" id="email" name="email" required placeholder="admin@suaoficina.com.br" 
+                    <input type="email" id="email" name="email" required placeholder="admin@suaoficina.pt" 
                         class="w-full pl-10 pr-4 py-2.5 bg-slate-900/90 border border-slate-700/80 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all">
                 </div>
             </div>
 
             <div>
                 <div class="flex items-center justify-between mb-2">
-                    <label for="senha" class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">Senha de Acesso</label>
+                    <label for="senha" class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">Palavra-passe de Acesso</label>
                 </div>
                 <div class="relative">
                     <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
@@ -55,7 +55,7 @@
 
         <div class="mt-6 pt-6 border-t border-slate-800 text-center">
             <p class="text-xs text-slate-400">
-                Sua oficina ainda não possui cadastro?
+                A sua oficina ainda não tem conta?
                 <a href="{{ url_for('auth.register') }}" class="font-semibold text-brand-400 hover:text-brand-300 transition-colors ml-1">Criar Conta Grátis</a>
             </p>
         </div>

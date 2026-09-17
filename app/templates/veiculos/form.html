@@ -1,105 +1,113 @@
 {% extends "base.html" %}
 
-{% block title %}{% if veiculo %}Editar Veículo{% else %}Novo Veículo{% endif %}{% endblock %}
-{% block header_title %}{% if veiculo %}Editar Veículo: {{ veiculo.placa }}{% else %}Cadastrar Novo Veículo{% endif %}{% endblock %}
+{% block title %}{% if veiculo %}Editar Viatura{% else %}Registar Viatura{% endif %}{% endblock %}
+{% block header_title %}{% if veiculo %}Editar Viatura: {{ veiculo.placa }}{% else %}Registar Nova Viatura{% endif %}{% endblock %}
 
 {% block content %}
 <div class="max-w-3xl mx-auto space-y-6">
     <div class="flex items-center justify-between">
-        <a href="{{ url_for('veiculos.index') }}" class="inline-flex items-center gap-2 text-xs font-medium text-slate-400 hover:text-slate-200 transition-colors">
+        <a href="javascript:history.back()" class="inline-flex items-center gap-2 text-xs font-medium text-slate-400 hover:text-slate-200 transition-colors">
             <i class="fa-solid fa-arrow-left"></i>
-            <span>Voltar para a listagem</span>
+            <span>Voltar</span>
         </a>
     </div>
 
     <div class="glass-panel rounded-2xl p-8 shadow-2xl border border-slate-800">
         <form method="POST" class="space-y-6">
             <!-- Vínculo com Cliente -->
-            <div>
-                <h3 class="text-sm font-bold text-slate-200 uppercase tracking-wider mb-4 flex items-center gap-2">
-                    <i class="fa-solid fa-user text-brand-400"></i>
-                    <span>Proprietário / Cliente</span>
-                </h3>
-                
-                <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1.5">Cliente Proprietário *</label>
-                    <select name="cliente_id" required class="w-full px-4 py-2.5 bg-slate-900 border border-slate-700/80 rounded-xl text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all">
-                        <option value="">Selecione um cliente...</option>
-                        {% for c in clientes %}
-                        <option value="{{ c.id }}" {% if (veiculo and veiculo.cliente_id == c.id) or (cliente_id_selecionado and cliente_id_selecionado == c.id) %}selected{% endif %}>
-                            {{ c.nome }} {% if c.cpf_cnpj %}({{ c.cpf_cnpj }}){% endif %}
+            <div class="bg-indigo-950/30 border border-indigo-500/20 p-5 rounded-xl">
+                <label class="block text-xs font-bold text-indigo-300 uppercase tracking-wider mb-2">Proprietário (Cliente) *</label>
+                <select name="cliente_id" required class="w-full px-4 py-2.5 bg-slate-900 border border-indigo-500/30 rounded-xl text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all">
+                    <option value="">Selecione o proprietário...</option>
+                    {% for c in clientes %}
+                        <option value="{{ c.id }}" {% if veiculo and veiculo.cliente_id == c.id %}selected{% elif cliente_id_pre == c.id %}selected{% endif %}>
+                            {{ c.nome }} {% if c.nif %}(NIF: {{ c.nif }}){% endif %}
                         </option>
-                        {% endfor %}
-                    </select>
-                </div>
+                    {% endfor %}
+                </select>
             </div>
 
-            <!-- Dados do Veículo -->
-            <div class="pt-4 border-t border-slate-800">
+            <!-- Dados Principais -->
+            <div>
                 <h3 class="text-sm font-bold text-slate-200 uppercase tracking-wider mb-4 flex items-center gap-2">
                     <i class="fa-solid fa-car text-brand-400"></i>
-                    <span>Identificação do Veículo</span>
+                    <span>Dados da Viatura</span>
                 </h3>
                 
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Placa *</label>
-                        <input type="text" name="placa" value="{{ veiculo.placa if veiculo else '' }}" required placeholder="ABC-1234 ou ABC1D23"
-                               class="w-full px-4 py-2.5 bg-slate-900 border border-slate-700/80 rounded-xl text-sm font-mono uppercase text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all">
+                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Matrícula *</label>
+                        <input type="text" name="placa" value="{{ veiculo.placa if veiculo else '' }}" required placeholder="AA-00-AA" maxlength="10"
+                               class="w-full px-4 py-2.5 bg-slate-900 border border-slate-700/80 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all uppercase font-mono tracking-widest">
                     </div>
-
                     <div>
-                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Marca / Fabricante *</label>
-                        <input type="text" name="marca" value="{{ veiculo.marca if veiculo else '' }}" required placeholder="Ex: Chevrolet, Volkswagen"
+                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Marca *</label>
+                        <input type="text" name="marca" value="{{ veiculo.marca if veiculo else '' }}" required placeholder="Audi, BMW, Renault..."
                                class="w-full px-4 py-2.5 bg-slate-900 border border-slate-700/80 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all">
                     </div>
-
                     <div>
                         <label class="block text-xs font-semibold text-slate-300 mb-1.5">Modelo *</label>
-                        <input type="text" name="modelo" value="{{ veiculo.modelo if veiculo else '' }}" required placeholder="Ex: Onix 1.0 Turbo"
+                        <input type="text" name="modelo" value="{{ veiculo.modelo if veiculo else '' }}" required placeholder="Ex: A4 Avant, Clio, Golf..."
                                class="w-full px-4 py-2.5 bg-slate-900 border border-slate-700/80 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all">
                     </div>
+                </div>
 
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Ano (Fabr./Modelo)</label>
-                        <input type="number" name="ano" value="{{ veiculo.ano if veiculo and veiculo.ano else '' }}" placeholder="2022" min="1900" max="2030"
+                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Ano (Fab.)</label>
+                        <input type="number" name="ano_fabricacao" value="{{ veiculo.ano_fabricacao if veiculo else '' }}" placeholder="2020" min="1950" max="2030"
                                class="w-full px-4 py-2.5 bg-slate-900 border border-slate-700/80 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all">
                     </div>
-
                     <div>
-                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Cor Predominante</label>
-                        <input type="text" name="cor" value="{{ veiculo.cor if veiculo else '' }}" placeholder="Ex: Prata, Preto"
+                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Ano (Mod.)</label>
+                        <input type="number" name="ano_modelo" value="{{ veiculo.ano_modelo if veiculo else '' }}" placeholder="2021" min="1950" max="2030"
                                class="w-full px-4 py-2.5 bg-slate-900 border border-slate-700/80 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all">
                     </div>
-
                     <div>
-                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Quilometragem Atual (KM)</label>
-                        <input type="number" name="km_atual" value="{{ veiculo.km_atual if veiculo and veiculo.km_atual else '' }}" placeholder="Ex: 45000" min="0"
+                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Cor</label>
+                        <input type="text" name="cor" value="{{ veiculo.cor if veiculo else '' }}" placeholder="Preto, Prata..."
                                class="w-full px-4 py-2.5 bg-slate-900 border border-slate-700/80 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all">
                     </div>
-
-                    <div class="sm:col-span-3">
-                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Número do Chassi</label>
-                        <input type="text" name="chassi" value="{{ veiculo.chassi if veiculo else '' }}" placeholder="9BWZZZ..."
-                               class="w-full px-4 py-2.5 bg-slate-900 border border-slate-700/80 rounded-xl text-sm font-mono uppercase text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Combustível</label>
+                        <select name="combustivel" class="w-full px-4 py-2.5 bg-slate-900 border border-slate-700/80 rounded-xl text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all">
+                            <option value="Gasolina" {% if veiculo and veiculo.combustivel=='Gasolina' %}selected{% endif %}>Gasolina</option>
+                            <option value="Gasóleo" {% if veiculo and veiculo.combustivel=='Gasóleo' %}selected{% endif %}>Gasóleo</option>
+                            <option value="Híbrido" {% if veiculo and veiculo.combustivel=='Híbrido' %}selected{% endif %}>Híbrido</option>
+                            <option value="Elétrico" {% if veiculo and veiculo.combustivel=='Elétrico' %}selected{% endif %}>Elétrico</option>
+                            <option value="GPL" {% if veiculo and veiculo.combustivel=='GPL' %}selected{% endif %}>GPL</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Quilometragem (KM)</label>
+                        <input type="number" name="km_atual" value="{{ veiculo.km_atual if veiculo else '' }}" placeholder="150000" min="0" step="1"
+                               class="w-full px-4 py-2.5 bg-slate-900 border border-slate-700/80 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Chassi (VIN)</label>
+                        <input type="text" name="chassi" value="{{ veiculo.chassi if veiculo else '' }}" placeholder="" maxlength="17"
+                               class="w-full px-4 py-2.5 bg-slate-900 border border-slate-700/80 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all uppercase font-mono">
                     </div>
                 </div>
             </div>
 
             <!-- Observações -->
             <div class="pt-4 border-t border-slate-800">
-                <label class="block text-xs font-semibold text-slate-300 mb-1.5">Observações ou Avarias Pré-existentes</label>
-                <textarea name="observacoes" rows="3" placeholder="Pequenos arranhões, barulhos no freio relatados..."
+                <label class="block text-xs font-semibold text-slate-300 mb-1.5">Observações Adicionais</label>
+                <textarea name="observacoes" rows="2" placeholder="Desgastes específicos, histórico, detalhes..."
                           class="w-full px-4 py-2.5 bg-slate-900 border border-slate-700/80 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all">{{ veiculo.observacoes if veiculo else '' }}</textarea>
             </div>
 
             <!-- Botões -->
             <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
-                <a href="{{ url_for('veiculos.index') }}" class="px-5 py-2.5 rounded-xl border border-slate-700 text-sm font-semibold text-slate-300 hover:bg-slate-800 transition-colors">
+                <a href="javascript:history.back()" class="px-5 py-2.5 rounded-xl border border-slate-700 text-sm font-semibold text-slate-300 hover:bg-slate-800 transition-colors">
                     Cancelar
                 </a>
                 <button type="submit" class="px-6 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-sm font-semibold shadow-lg shadow-brand-600/30 transition-all">
-                    {% if veiculo %}Salvar Alterações{% else %}Cadastrar Veículo{% endif %}
+                    {% if veiculo %}Guardar Alterações{% else %}Registar Viatura{% endif %}
                 </button>
             </div>
         </form>

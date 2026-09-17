@@ -50,6 +50,8 @@ def create_app(config_class=Config):
     from app.modules.os import bp as os_bp
     from app.modules.notificacoes import bp as notificacoes_bp
 
+    from app.modules.configuracoes import bp as configuracoes_bp
+
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(dashboard_bp, url_prefix='')
     app.register_blueprint(clientes_bp)
@@ -58,5 +60,6 @@ def create_app(config_class=Config):
     app.register_blueprint(servicos_bp)
     app.register_blueprint(os_bp)
     app.register_blueprint(notificacoes_bp)
+    app.register_blueprint(configuracoes_bp)
 
     return app

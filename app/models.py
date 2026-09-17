@@ -15,6 +15,9 @@ class Empresa(db.Model):
     telefone = db.Column(db.String(20))
     endereco = db.Column(db.String(255))
     cidade = db.Column('cidade', db.String(100))
+    codigo_postal = db.Column(db.String(9))
+    distrito = db.Column(db.String(50))
+    localidade = db.Column(db.String(100))
     data_cadastro = db.Column(db.DateTime, default=datetime.utcnow)
 
     usuarios = db.relationship('Usuario', back_populates='empresa', cascade="all, delete-orphan")
@@ -39,6 +42,9 @@ class Usuario(UserMixin, db.Model):
     senha_hash = db.Column(db.String(256), nullable=False)
     papel = db.Column(db.String(20), default='admin')
     ativo = db.Column(db.Boolean, default=True)
+    codigo_postal = db.Column(db.String(9))
+    distrito = db.Column(db.String(50))
+    localidade = db.Column(db.String(100))
     data_cadastro = db.Column(db.DateTime, default=datetime.utcnow)
 
     empresa = db.relationship('Empresa', back_populates='usuarios')
@@ -98,6 +104,9 @@ class Cliente(db.Model):
     cidade = db.Column('cidade', db.String(100))
     observacoes = db.Column(db.Text)
     ativo = db.Column(db.Boolean, default=True)
+    codigo_postal = db.Column(db.String(9))
+    distrito = db.Column(db.String(50))
+    localidade = db.Column(db.String(100))
     data_cadastro = db.Column(db.DateTime, default=datetime.utcnow)
 
     empresa = db.relationship('Empresa', backref=db.backref('clientes', lazy='dynamic', cascade='all, delete-orphan'))
@@ -123,6 +132,9 @@ class Veiculo(db.Model):
     chassi = db.Column(db.String(30))
     combustivel = db.Column(db.String(30), default='Gasolina')
     observacoes = db.Column(db.Text)
+    codigo_postal = db.Column(db.String(9))
+    distrito = db.Column(db.String(50))
+    localidade = db.Column(db.String(100))
     data_cadastro = db.Column(db.DateTime, default=datetime.utcnow)
 
     empresa = db.relationship('Empresa', backref=db.backref('veiculos', lazy='dynamic', cascade='all, delete-orphan'))
@@ -150,6 +162,9 @@ class Peca(db.Model):
     estoque_atual = db.Column(db.Float, default=0.0)
     estoque_minimo = db.Column(db.Float, default=0.0)
     localizacao = db.Column(db.String(50))
+    codigo_postal = db.Column(db.String(9))
+    distrito = db.Column(db.String(50))
+    localidade = db.Column(db.String(100))
     data_cadastro = db.Column(db.DateTime, default=datetime.utcnow)
 
     empresa = db.relationship('Empresa', backref=db.backref('pecas', lazy='dynamic', cascade='all, delete-orphan'))
@@ -181,6 +196,9 @@ class Servico(db.Model):
     categoria = db.Column(db.String(50), default='Mecânica Geral')
     preco_padrao = db.Column(db.Float, nullable=False, default=0.0)
     tempo_estimado_minutos = db.Column(db.Integer, default=60)
+    codigo_postal = db.Column(db.String(9))
+    distrito = db.Column(db.String(50))
+    localidade = db.Column(db.String(100))
     data_cadastro = db.Column(db.DateTime, default=datetime.utcnow)
 
     empresa = db.relationship('Empresa', backref=db.backref('servicos', lazy='dynamic', cascade='all, delete-orphan'))
@@ -351,6 +369,22 @@ class ItemPeca(db.Model):
 
     def __repr__(self):
         return f"<ItemPeca {self.descricao} (€{self.subtotal:.2f})>"
+
+
+class Configuracao(db.Model):
+    __tablename__ = 'configuracoes'
+
+    id = db.Column(db.Integer, primary_key=True)
+    empresa_id = db.Column(db.Integer, db.ForeignKey('empresas.id'), nullable=False, index=True)
+    chave = db.Column(db.String(100), nullable=False)
+    valor = db.Column(db.Text, nullable=True)
+    tipo = db.Column(db.String(20), default='string')
+    descricao = db.Column(db.String(255))
+    
+    __table_args__ = (db.UniqueConstraint('empresa_id', 'chave', name='uq_empresa_chave'),)
+
+    def __repr__(self):
+        return f"<Config {self.chave}>"
 
 
 from app.extensions import login_manager

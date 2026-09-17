@@ -35,10 +35,10 @@ def _texto_whatsapp(os):
         linhas.append(f"*Cliente:* {os.cliente.nome}")
     if os.veiculo:
         veiculo = os.veiculo
-        placa = veiculo.placa or ''
+        matricula = veiculo.matricula or ''
         modelo = veiculo.modelo or ''
-        if placa or modelo:
-            linhas.append(f"*Veículo:* {modelo} ({placa})".replace(' ()', ''))
+        if matricula or modelo:
+            linhas.append(f"*Viatura:* {modelo} ({matricula})".replace(' ()', ''))
     if os.km_atual:
         linhas.append(f"*KM atual:* {os.km_atual}")
     if os.defeito_reclamado:
@@ -51,18 +51,18 @@ def _texto_whatsapp(os):
         linhas.append("*Serviços:*")
         for item in itens_servico:
             qtd = f"{item.quantidade:g} x " if item.quantidade != 1.0 else ""
-            linhas.append(f"{qtd}{item.descricao} - R$ {item.subtotal:.2f}")
+            linhas.append(f"{qtd}{item.descricao} - € {item.subtotal:.2f}")
     if itens_peca:
         linhas.append("")
         linhas.append("*Peças:*")
         for item in itens_peca:
             qtd = f"{item.quantidade:g} x " if item.quantidade != 1.0 else ""
-            linhas.append(f"{qtd}{item.descricao} - R$ {item.subtotal:.2f}")
+            linhas.append(f"{qtd}{item.descricao} - € {item.subtotal:.2f}")
 
     linhas.append("")
     if os.valor_desconto > 0:
-        linhas.append(f"*Desconto:* -R$ {os.valor_desconto:.2f}")
-    linhas.append(f"*Valor Total: R$ {os.valor_total:.2f}*")
+        linhas.append(f"*Desconto:* -€ {os.valor_desconto:.2f}")
+    linhas.append(f"*Valor Total: € {os.valor_total:.2f}*")
     linhas.append("")
     linhas.append(f"*Status:* {os.status.replace('_', ' ').title()}")
 

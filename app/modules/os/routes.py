@@ -313,9 +313,9 @@ def adicionar_peca(id):
                 descricao = peca.descricao
             if valor_unitario <= 0:
                 valor_unitario = peca.preco_venda
-            # Alerta de estoque insuficiente (não bloqueia para orçamentos, mas avisa)
-            if peca.quantidade_estoque < quantidade:
-                flash(f'Atenção: A peça "{peca.descricao}" possui apenas {peca.quantidade_estoque} em estoque.', 'warning')
+            # Alerta de stock insuficiente (não bloqueia para orçamentos, mas avisa)
+            if peca.quantidade_stock < quantidade:
+                flash(f'Atenção: A peça "{peca.descricao}" possui apenas {peca.quantidade_stock} em stock.', 'warning')
                 
     if not descricao:
         flash('Informe a descrição da peça.', 'danger')
@@ -368,25 +368,25 @@ def alterar_status(id):
     status_anterior = ordem.status
     ordem.status = novo_status
     
-    # Regra de negócio: Se foi marcada como CONCLUIDA ou ENTREGUE e antes não estava, efetua a baixa no estoque
+    # Regra de negócio: Se foi marcada como CONCLUIDA ou ENTREGUE e antes não estava, efetua a baixa no stock
     if novo_status in ['CONCLUIDA', 'ENTREGUE'] and status_anterior not in ['CONCLUIDA', 'ENTREGUE']:
         ordem.data_conclusao = datetime.utcnow()
         if novo_status == 'ENTREGUE':
             ordem.data_entrega = datetime.utcnow()
             
-        # Baixa no estoque das peças cadastradas
+        # Baixa no stock das peças cadastradas
         for item in ordem.itens_pecas:
             if item.peca_id and item.peca:
-                item.peca.quantidade_estoque = max(0.0, item.peca.quantidade_estoque - item.quantidade)
+                item.peca.quantidade_stock = max(0.0, item.peca.quantidade_stock - item.quantidade)
                 
-        flash(f'Status alterado para {novo_status} e estoque de peças baixado com sucesso!', 'success')
+        flash(f'Status alterado para {novo_status} e stock de peças baixado com sucesso!', 'success')
         
     elif novo_status == 'CANCELADA' and status_anterior in ['CONCLUIDA', 'ENTREGUE']:
-        # Estorna peças de volta ao estoque se a OS for cancelada após conclusão
+        # Estorna peças de volta ao stock se a OS for cancelada após conclusão
         for item in ordem.itens_pecas:
             if item.peca_id and item.peca:
-                item.peca.quantidade_estoque += item.quantidade
-        flash('Status alterado para CANCELADA e itens estornados ao estoque.', 'warning')
+                item.peca.quantidade_stock += item.quantidade
+        flash('Status alterado para CANCELADA e itens estornados ao stock.', 'warning')
     else:
         flash(f'Status da OS #{ordem.numero_os} atualizado para {novo_status}.', 'success')
         
@@ -399,11 +399,11 @@ def excluir(id):
     ordem = OrdemServico.query.filter_by(id=id, empresa_id=current_user.empresa_id).first_or_404()
     num = ordem.numero_os
     
-    # Se já foi concluída, devolve ao estoque antes de excluir
+    # Se já foi concluída, devolve ao stock antes de excluir
     if ordem.status in ['CONCLUIDA', 'ENTREGUE']:
         for item in ordem.itens_pecas:
             if item.peca_id and item.peca:
-                item.peca.quantidade_estoque += item.quantidade
+                item.peca.quantidade_stock += item.quantidade
                 
     db.session.delete(ordem)
     db.session.commit()

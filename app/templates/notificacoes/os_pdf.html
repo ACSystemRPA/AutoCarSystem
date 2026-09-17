@@ -170,12 +170,12 @@
     {% endif %}
 </table>
 
-<!-- VEÍCULO -->
-<table class="section-title" border="0"><tr><td>VEÍCULO</td></tr></table>
+<!-- VIATURA -->
+<table class="section-title" border="0"><tr><td>VIATURA</td></tr></table>
 <table class="info-grid">
     {% if os.veiculo %}
-    <tr><td class="label">Placa:</td><td class="value" style="font-weight:bold;">{{ os.veiculo.placa or '—' }}</td></tr>
-    <tr><td class="label">Veículo:</td><td class="value">{{ os.veiculo.marca }} {{ os.veiculo.modelo }} ({{ os.veiculo.ano_fabricacao or 's/I' }}{% if os.veiculo.ano_modelo %}/{{ os.veiculo.ano_modelo }}{% endif %})</td></tr>
+    <tr><td class="label">Matrícula:</td><td class="value" style="font-weight:bold;">{{ os.veiculo.placa or '—' }}</td></tr>
+    <tr><td class="label">Viatura:</td><td class="value">{{ os.veiculo.marca }} {{ os.veiculo.modelo }} ({{ os.veiculo.ano_fabricacao or 's/I' }}{% if os.veiculo.ano_modelo %}/{{ os.veiculo.ano_modelo }}{% endif %})</td></tr>
     <tr><td class="label">Cor:</td><td class="value">{{ os.veiculo.cor or '—' }}</td></tr>
     <tr><td class="label">KM Atual:</td><td class="value">{{ os.km_atual ~ ' KM' if os.km_atual else 'Não informado' }}</td></tr>
     <tr><td class="label">Combustível:</td><td class="value">{{ os.nivel_combustivel or 'Não informado' }}</td></tr>
@@ -229,9 +229,9 @@
         <tr>
             <td>{{ item.descricao }}</td>
             <td>{{ item.mecanico.nome if item.mecanico else '—' }}</td>
-            <td class="right">R$ {{ "%.2f"|format(item.valor_unitario) }}</td>
+            <td class="right">€ {{ "%.2f"|format(item.valor_unitario) }}</td>
             <td class="center">{{ item.quantidade }}</td>
-            <td class="right" style="font-weight:bold;">R$ {{ "%.2f"|format(item.subtotal) }}</td>
+            <td class="right" style="font-weight:bold;">€ {{ "%.2f"|format(item.subtotal) }}</td>
         </tr>
         {% endfor %}
     </tbody>
@@ -241,7 +241,7 @@
 <!-- PEÇAS -->
 {% set itens_peca = os.itens_pecas.all() if os.itens_pecas else [] %}
 {% if itens_peca %}
-<table class="section-title" border="0"><tr><td>PEÇAS / PRODUTOS DO ESTOQUE</td></tr></table>
+<table class="section-title" border="0"><tr><td>PEÇAS / COMPONENTES</td></tr></table>
 <table class="items">
     <thead>
         <tr>
@@ -257,9 +257,9 @@
         <tr>
             <td>{{ item.descricao }}</td>
             <td>{% if item.peca %}{{ item.peca.codigo_referencia or item.peca.marca or '—' }}{% else %}—{% endif %}</td>
-            <td class="right">R$ {{ "%.2f"|format(item.valor_unitario) }}</td>
+            <td class="right">€ {{ "%.2f"|format(item.valor_unitario) }}</td>
             <td class="center">{{ item.quantidade }}</td>
-            <td class="right" style="font-weight:bold;">R$ {{ "%.2f"|format(item.subtotal) }}</td>
+            <td class="right" style="font-weight:bold;">€ {{ "%.2f"|format(item.subtotal) }}</td>
         </tr>
         {% endfor %}
     </tbody>
@@ -276,14 +276,14 @@
 <!-- TOTAIS -->
 <div class="totals clearfix">
     <table>
-        <tr><td class="label">Serviços:</td><td style="text-align:right;">R$ {{ "%.2f"|format(os.valor_servicos or 0.0) }}</td></tr>
-        <tr><td class="label">Peças / Produtos:</td><td style="text-align:right;">R$ {{ "%.2f"|format(os.valor_pecas or 0.0) }}</td></tr>
+        <tr><td class="label">Serviços:</td><td style="text-align:right;">€ {{ "%.2f"|format(os.valor_servicos or 0.0) }}</td></tr>
+        <tr><td class="label">Peças / Produtos:</td><td style="text-align:right;">€ {{ "%.2f"|format(os.valor_pecas or 0.0) }}</td></tr>
         {% if os.desconto and os.desconto > 0 %}
-        <tr><td class="label">Desconto:</td><td style="text-align:right; color:#be123c;">- R$ {{ "%.2f"|format(os.desconto) }}</td></tr>
+        <tr><td class="label">Desconto:</td><td style="text-align:right; color:#be123c;">- € {{ "%.2f"|format(os.desconto) }}</td></tr>
         {% endif %}
         <tr class="total-row">
             <td class="label" style="font-size:10pt;">VALOR TOTAL:</td>
-            <td style="text-align:right; font-size:11pt; color:#4f46e5; font-weight:bold;">R$ {{ "%.2f"|format(os.valor_total) }}</td>
+            <td style="text-align:right; font-size:11pt; color:#4f46e5; font-weight:bold;">€ {{ "%.2f"|format(os.valor_total) }}</td>
         </tr>
     </table>
 </div>

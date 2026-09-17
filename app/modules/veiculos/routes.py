@@ -27,7 +27,7 @@ def index():
 @login_required
 def novo():
     cliente_id_pre = request.args.get('cliente_id', type=int)
-    clientes = Cliente.query.filter_by(empresa_id=current_user.empresa_id).order_by(Cliente.nome.asc()).all()
+    clientes = Cliente.query.filter_by(empresa_id=current_user.empresa_id, ativo=True).order_by(Cliente.nome.asc()).all()
 
     if request.method == 'POST':
         cliente_id = request.form.get('cliente_id', type=int)
@@ -39,14 +39,13 @@ def novo():
         cor = request.form.get('cor', '').strip()
         km_atual = request.form.get('km_atual', type=int) or 0
         chassi = request.form.get('chassi', '').strip().upper()
-        combustivel = request.form.get('combustivel', 'Flex')
+        combustivel = request.form.get('combustivel', 'Gasolina')
         observacoes = request.form.get('observacoes', '').strip()
 
         if not cliente_id or not placa or not modelo or not marca:
-            flash('Preencha os campos obrigatórios: Proprietário, Placa, Marca e Modelo.', 'danger')
+            flash('Preencha os campos obrigatórios: Proprietário, Matrícula, Marca e Modelo.', 'danger')
             return render_template('veiculos/form.html', veiculo=None, clientes=clientes, cliente_id_pre=cliente_id_pre)
 
-        # Validar se o cliente pertence à mesma empresa
         cliente = Cliente.query.filter_by(id=cliente_id, empresa_id=current_user.empresa_id).first()
         if not cliente:
             flash('Cliente inválido selecionado.', 'danger')
@@ -69,7 +68,7 @@ def novo():
         
         db.session.add(novo_veiculo)
         db.session.commit()
-        flash(f'Veículo {placa} ({modelo}) cadastrado com sucesso!', 'success')
+        flash(f'Viatura {placa} ({modelo}) registada com sucesso!', 'success')
         return redirect(url_for('clientes.detalhes', id=cliente_id))
 
     return render_template('veiculos/form.html', veiculo=None, clientes=clientes, cliente_id_pre=cliente_id_pre)
@@ -79,7 +78,7 @@ def novo():
 @login_required
 def editar(id):
     veiculo = Veiculo.query.filter_by(id=id, empresa_id=current_user.empresa_id).first_or_404()
-    clientes = Cliente.query.filter_by(empresa_id=current_user.empresa_id).order_by(Cliente.nome.asc()).all()
+    clientes = Cliente.query.filter_by(empresa_id=current_user.empresa_id, ativo=True).order_by(Cliente.nome.asc()).all()
 
     if request.method == 'POST':
         cliente_id = request.form.get('cliente_id', type=int)
@@ -91,11 +90,11 @@ def editar(id):
         cor = request.form.get('cor', '').strip()
         km_atual = request.form.get('km_atual', type=int) or 0
         chassi = request.form.get('chassi', '').strip().upper()
-        combustivel = request.form.get('combustivel', 'Flex')
+        combustivel = request.form.get('combustivel', 'Gasolina')
         observacoes = request.form.get('observacoes', '').strip()
 
         if not cliente_id or not placa or not modelo or not marca:
-            flash('Preencha os campos obrigatórios: Proprietário, Placa, Marca e Modelo.', 'danger')
+            flash('Preencha os campos obrigatórios: Proprietário, Matrícula, Marca e Modelo.', 'danger')
             return render_template('veiculos/form.html', veiculo=veiculo, clientes=clientes, cliente_id_pre=None)
 
         veiculo.cliente_id = cliente_id
@@ -111,7 +110,7 @@ def editar(id):
         veiculo.observacoes = observacoes
 
         db.session.commit()
-        flash(f'Veículo {placa} atualizado com sucesso!', 'success')
+        flash(f'Viatura {placa} atualizada com sucesso!', 'success')
         return redirect(url_for('veiculos.index'))
 
     return render_template('veiculos/form.html', veiculo=veiculo, clientes=clientes, cliente_id_pre=None)
@@ -124,5 +123,5 @@ def excluir(id):
     placa = veiculo.placa
     db.session.delete(veiculo)
     db.session.commit()
-    flash(f'Veículo {placa} removido com sucesso.', 'info')
+    flash(f'Viatura {placa} eliminada com sucesso.', 'info')
     return redirect(url_for('veiculos.index'))

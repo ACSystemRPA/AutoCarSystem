@@ -8,7 +8,7 @@ from app.modules.pecas import bp
 @login_required
 def index():
     busca = request.args.get('busca', '').strip()
-    filtro_estoque = request.args.get('filtro_estoque', '')
+    filtro_stock = request.args.get('filtro_stock', '')
     query = Peca.query.filter_by(empresa_id=current_user.empresa_id)
     
     if busca:
@@ -19,31 +19,31 @@ def index():
             (Peca.localizacao.ilike(f'%{busca}%'))
         )
         
-    if filtro_estoque == 'baixo':
+    if filtro_stock == 'baixo':
         query = query.filter(Peca.estoque_atual <= Peca.estoque_minimo)
         
     pecas = query.order_by(Peca.descricao.asc()).all()
     
-    # Métricas de estoque
+    # Métricas de stock
     total_itens = len(pecas)
-    itens_baixo_estoque = sum(1 for p in pecas if p.estoque_baixo)
-    valor_total_estoque = sum(p.estoque_atual * p.preco_custo for p in pecas)
+    itens_baixo_stock = sum(1 for p in pecas if p.estoque_baixo)
+    valor_total_stock = sum(p.estoque_atual * p.preco_custo for p in pecas)
     
     stats = {
         'total_itens': total_itens,
-        'total_baixo_estoque': itens_baixo_estoque,
-        'valor_estoque_custo': valor_total_estoque,
-        'valor_total_estoque': valor_total_estoque
+        'total_baixo_stock': itens_baixo_stock,
+        'valor_stock_custo': valor_total_stock,
+        'valor_total_stock': valor_total_stock
     }
     
     return render_template('pecas/index.html', 
                            pecas=pecas, 
                            busca=busca, 
-                           filtro_estoque=filtro_estoque,
+                           filtro_stock=filtro_stock,
                            stats=stats,
                            total_itens=total_itens,
-                           itens_baixo_estoque=itens_baixo_estoque,
-                           valor_total_estoque=valor_total_estoque)
+                           itens_baixo_stock=itens_baixo_stock,
+                           valor_total_stock=valor_total_stock)
 
 
 @bp.route('/nova', methods=['GET', 'POST'])
@@ -79,7 +79,7 @@ def nova():
         
         db.session.add(nova_peca)
         db.session.commit()
-        flash(f'Peça/Item "{descricao}" adicionado com sucesso ao estoque!', 'success')
+        flash(f'Peça/Item "{descricao}" adicionado com sucesso ao stock!', 'success')
         return redirect(url_for('pecas.index'))
 
     return render_template('pecas/form.html', peca=None)

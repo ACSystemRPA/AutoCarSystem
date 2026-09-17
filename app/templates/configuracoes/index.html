@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Configurações do Sistema - AutoCarSystem{% endblock %}
+{% block header_title %}Definições da Oficina{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6">
+    <div class="glass-panel rounded-2xl p-8 shadow-2xl border border-slate-800">
+        <form method="POST" action="{{ url_for('configuracoes.salvar') }}" class="space-y-8">
+            
+            <!-- Integrações e APIs -->
+            <div>
+                <h3 class="text-sm font-bold text-slate-200 uppercase tracking-wider mb-4 flex items-center gap-2 pb-2 border-b border-slate-800">
+                    <i class="fa-solid fa-plug text-brand-400"></i>
+                    <span>Integrações (APIs Externas)</span>
+                </h3>
+                
+                <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-5">
+                    <div class="flex items-start gap-4">
+                        <div class="mt-1">
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" name="geoapi_ativa" value="✓" {% if geoapi_ativa %}checked{% endif %} class="sr-only peer">
+                                <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                            </label>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-semibold text-slate-200">Autocompletar Moradas (GeoAPI.pt)</h4>
+                            <p class="text-xs text-slate-400 mt-1">Ao ativar, sempre que preencher um Código Postal (em Viaturas ou Clientes), o sistema irá conectar-se aos serviços gratuitos do <strong>GeoAPI.pt</strong> para preencher automaticamente o Distrito, Concelho e Localidade.</p>
+                            <p class="text-[10px] text-brand-400 mt-2 font-mono bg-brand-900/20 px-2 py-1 inline-block rounded"><i class="fa-solid fa-link"></i> Endpoint: https://json.geoapi.pt/codigo_postal/</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botões -->
+            <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
+                <button type="submit" class="px-6 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-sm font-semibold shadow-lg shadow-brand-600/30 transition-all">
+                    Guardar Definições
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

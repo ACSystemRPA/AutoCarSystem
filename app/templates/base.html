@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="h-full bg-slate-950 text-slate-100">
+<html lang="pt-PT" class="h-full bg-slate-950 text-slate-100">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -135,31 +135,30 @@
 
                 <a href="{{ url_for('veiculos.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all {% if 'veiculos.' in request.endpoint %}bg-brand-600 text-white shadow-lg shadow-brand-600/30{% else %}text-slate-400 hover:text-slate-100 hover:bg-slate-800/60{% endif %}">
                     <i class="fa-solid fa-car-side w-5 text-center"></i>
-                    <span>Veículos</span>
+                    <span>Viaturas</span>
                 </a>
 
                 <div class="pt-4 pb-1 px-3">
-                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Catálogo & Estoque</span>
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Catálogo & Stock</span>
                 </div>
 
                 <a href="{{ url_for('pecas.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all {% if 'pecas.' in request.endpoint %}bg-brand-600 text-white shadow-lg shadow-brand-600/30{% else %}text-slate-400 hover:text-slate-100 hover:bg-slate-800/60{% endif %}">
                     <i class="fa-solid fa-boxes-stacked w-5 text-center"></i>
-                    <span>Peças & Estoque</span>
+                    <span>Peças & Stock</span>
                 </a>
 
                 <a href="{{ url_for('servicos.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all {% if 'servicos.' in request.endpoint %}bg-brand-600 text-white shadow-lg shadow-brand-600/30{% else %}text-slate-400 hover:text-slate-100 hover:bg-slate-800/60{% endif %}">
                     <i class="fa-solid fa-wrench w-5 text-center"></i>
-                    <span>Mão de Obra / Serviços</span>
+                    <span>Serviços</span>
                 </a>
 
                 <div class="pt-4 pb-1 px-3">
-                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Relatórios</span>
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Relatórios & Config</span>
                 </div>
 
-                <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:text-slate-100 hover:bg-slate-800/60 transition-all opacity-80 cursor-not-allowed" title="Em breve na Fase 5">
-                    <i class="fa-solid fa-print w-5 text-center"></i>
-                    <span>Impressões & PDFs</span>
-                    <span class="ml-auto text-[10px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded border border-slate-700">Fase 5</span>
+                <a href="{{ url_for('configuracoes.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all {% if 'configuracoes.' in request.endpoint %}bg-brand-600 text-white shadow-lg shadow-brand-600/30{% else %}text-slate-400 hover:text-slate-100 hover:bg-slate-800/60{% endif %}">
+                    <i class="fa-solid fa-cog w-5 text-center"></i>
+                    <span>Configurações</span>
                 </a>
             </nav>
 
@@ -212,7 +211,7 @@
         if (dateEl) {
             const now = new Date();
             const options = { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' };
-            dateEl.innerText = now.toLocaleDateString('pt-BR', options);
+            dateEl.innerText = now.toLocaleDateString('pt-PT', options);
         }
 
         // Auto dismiss flash messages after 5 seconds
@@ -224,6 +223,7 @@
             });
         }, 5000);
     </script>
+    <script src="{{ url_for('static', filename='js/geo.js') }}"></script>
     {% block scripts %}{% endblock %}
 </body>
 </html>

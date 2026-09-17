@@ -30,7 +30,7 @@
             <button onclick="document.getElementById('modal-status').classList.remove('hidden')"
                     class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-100 text-xs font-semibold border border-slate-700 transition-all flex items-center gap-2">
                 <i class="fa-solid fa-arrows-rotate text-brand-400"></i>
-                <span>Alterar Status</span>
+                <span>Alterar Estado</span>
             </button>
 
             <!-- Editar Dados Básicos -->
@@ -154,23 +154,23 @@
             <div class="space-y-1.5 text-xs text-slate-300">
                 <div class="flex justify-between">
                     <span class="text-slate-400">Serviços:</span>
-                    <span class="font-mono">R$ {{ "%.2f"|format(os.valor_servicos)|replace('.', ',') }}</span>
+                    <span class="font-mono">€ {{ "%.2f"|format(os.valor_servicos)|replace('.', ',') }}</span>
                 </div>
                 <div class="flex justify-between">
                     <span class="text-slate-400">Peças / Produtos:</span>
-                    <span class="font-mono">R$ {{ "%.2f"|format(os.valor_pecas)|replace('.', ',') }}</span>
+                    <span class="font-mono">€ {{ "%.2f"|format(os.valor_pecas)|replace('.', ',') }}</span>
                 </div>
                 {% if os.valor_desconto > 0 %}
                 <div class="flex justify-between text-rose-400">
                     <span>Desconto Total:</span>
-                    <span class="font-mono">- R$ {{ "%.2f"|format(os.valor_desconto)|replace('.', ',') }}</span>
+                    <span class="font-mono">- € {{ "%.2f"|format(os.valor_desconto)|replace('.', ',') }}</span>
                 </div>
                 {% endif %}
             </div>
             <div class="pt-2 border-t border-slate-800 flex items-center justify-between">
                 <span class="text-xs font-bold uppercase text-slate-300">Valor Total</span>
                 <span class="text-xl font-extrabold text-emerald-400 font-mono">
-                    R$ {{ "%.2f"|format(os.valor_total)|replace('.', ',') }}
+                    € {{ "%.2f"|format(os.valor_total)|replace('.', ',') }}
                 </span>
             </div>
         </div>
@@ -188,7 +188,7 @@
                             <i class="fa-solid fa-wrench"></i>
                         </div>
                         <div>
-                            <h3 class="text-sm font-bold text-slate-100">Serviços & Mão de Obra</h3>
+                            <h3 class="text-sm font-bold text-slate-100">Serviços / Mão de Obra</h3>
                             <span class="text-[11px] text-slate-400">{{ os.itens_servico|length }} serviço(s) adicionado(s)</span>
                         </div>
                     </div>
@@ -227,13 +227,13 @@
                                     {{ item.mecanico.nome if item.mecanico else '—' }}
                                 </td>
                                 <td class="px-4 py-3.5 text-right font-mono text-slate-300">
-                                    R$ {{ "%.2f"|format(item.valor_unitario)|replace('.', ',') }}
+                                    € {{ "%.2f"|format(item.valor_unitario)|replace('.', ',') }}
                                 </td>
                                 <td class="px-3 py-3.5 text-center font-semibold text-slate-200">
                                     {{ item.quantidade }}
                                 </td>
                                 <td class="px-4 py-3.5 text-right font-mono font-bold text-slate-100">
-                                    R$ {{ "%.2f"|format(item.valor_total)|replace('.', ',') }}
+                                    € {{ "%.2f"|format(item.valor_total)|replace('.', ',') }}
                                 </td>
                                 <td class="px-4 py-3.5 text-center">
                                     {% if os.status not in ['CONCLUIDA', 'ENTREGUE', 'CANCELADA'] %}
@@ -266,7 +266,7 @@
                             <i class="fa-solid fa-gears"></i>
                         </div>
                         <div>
-                            <h3 class="text-sm font-bold text-slate-100">Peças & Produtos do Estoque</h3>
+                            <h3 class="text-sm font-bold text-slate-100">Peças / Componentes</h3>
                             <span class="text-[11px] text-slate-400">{{ os.itens_peca|length }} item(ns) lançado(s)</span>
                         </div>
                     </div>
@@ -302,13 +302,13 @@
                                     {{ item.peca.codigo_interno or item.peca.codigo_fabricante or item.peca.marca or '—' }}
                                 </td>
                                 <td class="px-4 py-3.5 text-right font-mono text-slate-300">
-                                    R$ {{ "%.2f"|format(item.valor_unitario)|replace('.', ',') }}
+                                    € {{ "%.2f"|format(item.valor_unitario)|replace('.', ',') }}
                                 </td>
                                 <td class="px-3 py-3.5 text-center font-semibold text-slate-200">
                                     {{ item.quantidade }}
                                 </td>
                                 <td class="px-4 py-3.5 text-right font-mono font-bold text-slate-100">
-                                    R$ {{ "%.2f"|format(item.valor_total)|replace('.', ',') }}
+                                    € {{ "%.2f"|format(item.valor_total)|replace('.', ',') }}
                                 </td>
                                 <td class="px-4 py-3.5 text-center">
                                     {% if os.status not in ['CONCLUIDA', 'ENTREGUE', 'CANCELADA'] %}
@@ -328,7 +328,7 @@
                 </div>
                 {% else %}
                 <div class="p-6 text-center text-xs text-slate-500">
-                    Nenhuma peça do estoque lançada nesta OS ainda.
+                    Nenhuma peça do stock lançada nesta OS ainda.
                 </div>
                 {% endif %}
             </div>
@@ -439,7 +439,7 @@
                         class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-slate-100 focus:ring-brand-500">
                     <option value="">Selecione o serviço...</option>
                     {% for s in servicos_disponiveis %}
-                        <option value="{{ s.id }}" data-preco="{{ s.preco_padrao }}">{{ s.nome }} (R$ {{ "%.2f"|format(s.preco_padrao) }})</option>
+                        <option value="{{ s.id }}" data-preco="{{ s.preco_padrao }}">{{ s.nome }} (€ {{ "%.2f"|format(s.preco_padrao) }})</option>
                     {% endfor %}
                 </select>
             </div>
@@ -457,7 +457,7 @@
 
             <div class="grid grid-cols-3 gap-3">
                 <div>
-                    <label for="srv_valor" class="block text-xs font-semibold text-slate-300 mb-1">Valor Unit. (R$)</label>
+                    <label for="srv_valor" class="block text-xs font-semibold text-slate-300 mb-1">Valor Unit. (€)</label>
                     <input type="number" step="0.01" id="srv_valor" name="valor_unitario" placeholder="0.00" required
                            class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-slate-100">
                 </div>
@@ -467,7 +467,7 @@
                            class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-slate-100">
                 </div>
                 <div>
-                    <label for="srv_desc" class="block text-xs font-semibold text-slate-300 mb-1">Desconto (R$)</label>
+                    <label for="srv_desc" class="block text-xs font-semibold text-slate-300 mb-1">Desconto (€)</label>
                     <input type="number" step="0.01" id="srv_desc" name="desconto" value="0.00"
                            class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-slate-100">
                 </div>
@@ -507,13 +507,13 @@
 
         <form method="POST" action="{{ url_for('os.adicionar_peca', id=os.id) }}" class="space-y-4">
             <div>
-                <label for="peca_id" class="block text-xs font-semibold text-slate-300 mb-1">Peça do Estoque <span class="text-rose-400">*</span></label>
+                <label for="peca_id" class="block text-xs font-semibold text-slate-300 mb-1">Peça do Stock <span class="text-rose-400">*</span></label>
                 <select id="peca_id" name="peca_id" required onchange="atualizarPrecoPeca(this)"
                         class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-slate-100 focus:ring-indigo-500">
                     <option value="">Selecione a peça...</option>
                     {% for p in pecas_disponiveis %}
-                        <option value="{{ p.id }}" data-preco="{{ p.preco_venda }}" data-estoque="{{ p.estoque_atual }}">
-                            {{ p.nome }} (Estoque: {{ p.estoque_atual }} | R$ {{ "%.2f"|format(p.preco_venda) }})
+                        <option value="{{ p.id }}" data-preco="{{ p.preco_venda }}" data-stock="{{ p.stock_atual }}">
+                            {{ p.nome }} (Stock: {{ p.stock_atual }} | € {{ "%.2f"|format(p.preco_venda) }})
                         </option>
                     {% endfor %}
                 </select>
@@ -521,7 +521,7 @@
 
             <div class="grid grid-cols-3 gap-3">
                 <div>
-                    <label for="pca_valor" class="block text-xs font-semibold text-slate-300 mb-1">Valor Unit. (R$)</label>
+                    <label for="pca_valor" class="block text-xs font-semibold text-slate-300 mb-1">Valor Unit. (€)</label>
                     <input type="number" step="0.01" id="pca_valor" name="valor_unitario" placeholder="0.00" required
                            class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-slate-100">
                 </div>
@@ -531,7 +531,7 @@
                            class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-slate-100">
                 </div>
                 <div>
-                    <label for="pca_desc" class="block text-xs font-semibold text-slate-300 mb-1">Desconto (R$)</label>
+                    <label for="pca_desc" class="block text-xs font-semibold text-slate-300 mb-1">Desconto (€)</label>
                     <input type="number" step="0.01" id="pca_desc" name="desconto" value="0.00"
                            class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-slate-100">
                 </div>
@@ -556,7 +556,7 @@
     <div class="glass-panel p-6 rounded-2xl w-full max-w-md border border-slate-700 shadow-2xl space-y-4">
         <div class="flex items-center justify-between border-b border-slate-800 pb-3">
             <h3 class="text-sm font-bold text-slate-100 flex items-center gap-2">
-                <i class="fa-solid fa-arrows-rotate text-brand-400"></i> Atualizar Status da OS
+                <i class="fa-solid fa-arrows-rotate text-brand-400"></i> Atualizar Estado da OS
             </h3>
             <button onclick="document.getElementById('modal-status').classList.add('hidden')" class="text-slate-400 hover:text-white text-sm">
                 <i class="fa-solid fa-xmark"></i>
@@ -565,7 +565,7 @@
 
         <form method="POST" action="{{ url_for('os.alterar_status', id=os.id) }}" class="space-y-4">
             <div>
-                <label for="novo_status" class="block text-xs font-semibold text-slate-300 mb-1.5">Novo Status</label>
+                <label for="novo_status" class="block text-xs font-semibold text-slate-300 mb-1.5">Novo Estado</label>
                 <select id="novo_status" name="status" required
                         class="w-full px-3 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-slate-100 focus:ring-brand-500">
                     <option value="ABERTA" {% if os.status == 'ABERTA' %}selected{% endif %}>Aberta</option>
@@ -573,12 +573,12 @@
                     <option value="APROVADA" {% if os.status == 'APROVADA' %}selected{% endif %}>Aprovada</option>
                     <option value="EM_ANDAMENTO" {% if os.status == 'EM_ANDAMENTO' %}selected{% endif %}>Em Andamento</option>
                     <option value="AGUARDANDO_PECAS" {% if os.status == 'AGUARDANDO_PECAS' %}selected{% endif %}>Aguardando Peças</option>
-                    <option value="CONCLUIDA" {% if os.status == 'CONCLUIDA' %}selected{% endif %}>Concluída (Baixa Estoque Automática)</option>
+                    <option value="CONCLUIDA" {% if os.status == 'CONCLUIDA' %}selected{% endif %}>Concluída (Baixa Stock Automática)</option>
                     <option value="ENTREGUE" {% if os.status == 'ENTREGUE' %}selected{% endif %}>Entregue</option>
-                    <option value="CANCELADA" {% if os.status == 'CANCELADA' %}selected{% endif %}>Cancelada (Estorno de Estoque)</option>
+                    <option value="CANCELADA" {% if os.status == 'CANCELADA' %}selected{% endif %}>Cancelada (Estorno de Stock)</option>
                 </select>
                 <p class="text-[11px] text-slate-400 mt-2 bg-slate-900/80 p-2.5 rounded-lg border border-slate-800">
-                    <i class="fa-solid fa-circle-info text-brand-400 mr-1"></i> Ao marcar como <b>Concluída</b> ou <b>Entregue</b>, as peças lançadas terão baixa automática no estoque.
+                    <i class="fa-solid fa-circle-info text-brand-400 mr-1"></i> Ao marcar como <b>Concluída</b> ou <b>Entregue</b>, as peças lançadas terão baixa automática no stock.
                 </p>
             </div>
 
@@ -589,7 +589,7 @@
                 </button>
                 <button type="submit"
                         class="px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold shadow">
-                    Confirmar Mudança
+                    Confirmar Alteração
                 </button>
             </div>
         </form>

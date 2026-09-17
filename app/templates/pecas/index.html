@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
-{% block title %}Controle de Estoque & Peças{% endblock %}
-{% block header_title %}Peças & Controle de Estoque{% endblock %}
+{% block title %}Controlo de Stock & Peças{% endblock %}
+{% block header_title %}Peças & Controlo de Stock{% endblock %}
 
 {% block content %}
 <div class="space-y-6">
@@ -12,7 +12,7 @@
                 <i class="fa-solid fa-boxes-stacked"></i>
             </div>
             <div>
-                <p class="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Itens Cadastrados</p>
+                <p class="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Itens Registados</p>
                 <p class="text-xl font-bold text-white">{{ stats.total_itens }}</p>
             </div>
         </div>
@@ -22,18 +22,18 @@
                 <i class="fa-solid fa-coins"></i>
             </div>
             <div>
-                <p class="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Patrimônio em Estoque (Custo)</p>
-                <p class="text-xl font-bold text-white">R$ {{ "{:,.2f}".format(stats.valor_estoque_custo).replace(',', 'X').replace('.', ',').replace('X', '.') }}</p>
+                <p class="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Valor em Stock (Custo)</p>
+                <p class="text-xl font-bold text-white">{{ stats.valor_stock_custo|currency_pt }}</p>
             </div>
         </div>
 
-        <div class="glass-panel p-5 rounded-2xl border {% if stats.total_baixo_estoque > 0 %}border-amber-500/30 bg-amber-500/5{% else %}border-slate-800{% endif %} flex items-center gap-4">
-            <div class="w-12 h-12 rounded-xl {% if stats.total_baixo_estoque > 0 %}bg-amber-500/20 text-amber-400 border border-amber-500/30{% else %}bg-slate-800 text-slate-400{% endif %} flex items-center justify-center text-lg">
+        <div class="glass-panel p-5 rounded-2xl border {% if stats.total_baixo_stock > 0 %}border-amber-500/30 bg-amber-500/5{% else %}border-slate-800{% endif %} flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl {% if stats.total_baixo_stock > 0 %}bg-amber-500/20 text-amber-400 border border-amber-500/30{% else %}bg-slate-800 text-slate-400{% endif %} flex items-center justify-center text-lg">
                 <i class="fa-solid fa-triangle-exclamation"></i>
             </div>
             <div>
-                <p class="text-[11px] font-medium {% if stats.total_baixo_estoque > 0 %}text-amber-300{% else %}text-slate-400{% endif %} uppercase tracking-wider">Abaixo do Mínimo</p>
-                <p class="text-xl font-bold {% if stats.total_baixo_estoque > 0 %}text-amber-400{% else %}text-white{% endif %}">{{ stats.total_baixo_estoque }}</p>
+                <p class="text-[11px] font-medium {% if stats.total_baixo_stock > 0 %}text-amber-300{% else %}text-slate-400{% endif %} uppercase tracking-wider">Abaixo do Mínimo</p>
+                <p class="text-xl font-bold {% if stats.total_baixo_stock > 0 %}text-amber-400{% else %}text-white{% endif %}">{{ stats.total_baixo_stock }}</p>
             </div>
         </div>
     </div>
@@ -44,7 +44,7 @@
             <form method="GET" class="w-full sm:w-auto flex-1 flex items-center gap-3">
                 <div class="relative flex-1">
                     <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
-                    <input type="text" name="q" value="{{ request.args.get('q', '') }}" placeholder="Buscar por código, nome, marca ou fornecedor..."
+                    <input type="text" name="q" value="{{ request.args.get('q', '') }}" placeholder="Pesquisar por código, nome, marca ou fornecedor..."
                            class="w-full pl-10 pr-4 py-2 bg-slate-900 border border-slate-700/80 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all">
                 </div>
                 <button type="submit" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl border border-slate-700 transition-colors">
@@ -53,10 +53,10 @@
             </form>
 
             <div class="flex items-center gap-2">
-                <a href="{{ url_for('pecas.index', estoque_baixo='1') }}" class="px-3 py-2 rounded-xl text-xs font-semibold border {% if request.args.get('estoque_baixo') %}bg-amber-500/20 text-amber-300 border-amber-500/40{% else %}bg-slate-900 text-slate-400 border-slate-800 hover:text-slate-200{% endif %} transition-all">
+                <a href="{{ url_for('pecas.index', filtro_stock='1') }}" class="px-3 py-2 rounded-xl text-xs font-semibold border {% if request.args.get('filtro_stock') %}bg-amber-500/20 text-amber-300 border-amber-500/40{% else %}bg-slate-900 text-slate-400 border-slate-800 hover:text-slate-200{% endif %} transition-all">
                     <i class="fa-solid fa-filter mr-1"></i> Apenas Críticos
                 </a>
-                {% if request.args.get('q') or request.args.get('estoque_baixo') %}
+                {% if request.args.get('q') or request.args.get('filtro_stock') %}
                 <a href="{{ url_for('pecas.index') }}" class="px-3 py-2 text-xs font-medium text-slate-400 hover:text-slate-200">
                     Limpar
                 </a>
@@ -80,7 +80,7 @@
                         <th class="px-6 py-3.5">Código / SKU</th>
                         <th class="px-6 py-3.5">Nome da Peça</th>
                         <th class="px-6 py-3.5">Marca / Categoria</th>
-                        <th class="px-6 py-3.5">Estoque</th>
+                        <th class="px-6 py-3.5">Stock</th>
                         <th class="px-6 py-3.5">Preço Custo</th>
                         <th class="px-6 py-3.5">Preço Venda</th>
                         <th class="px-6 py-3.5">Margem</th>
@@ -103,21 +103,21 @@
                         </td>
                         <td class="px-6 py-4">
                             <div class="flex items-center gap-2">
-                                <span class="font-bold {{ 'text-amber-400' if p.estoque_baixo else 'text-slate-100' }}">
-                                    {{ p.estoque_atual }} {{ p.unidade_medida or 'UN' }}
+                                <span class="font-bold {{ 'text-amber-400' if p.filtro_stock else 'text-slate-100' }}">
+                                    {{ p.stock_atual }} {{ p.unidade_medida or 'UN' }}
                                 </span>
-                                {% if p.estoque_baixo %}
+                                {% if p.filtro_stock %}
                                 <span class="px-1.5 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[10px] font-bold">
-                                    Mín: {{ p.estoque_minimo }}
+                                    Mín: {{ p.stock_minimo }}
                                 </span>
                                 {% endif %}
                             </div>
                         </td>
                         <td class="px-6 py-4 text-slate-400">
-                            R$ {{ "{:,.2f}".format(p.preco_custo).replace(',', 'X').replace('.', ',').replace('X', '.') }}
+                            {{ p.preco_custo|currency_pt }}
                         </td>
                         <td class="px-6 py-4 font-semibold text-emerald-400">
-                            R$ {{ "{:,.2f}".format(p.preco_venda).replace(',', 'X').replace('.', ',').replace('X', '.') }}
+                            {{ p.preco_venda|currency_pt }}
                         </td>
                         <td class="px-6 py-4">
                             <span class="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 text-[11px] font-medium">
@@ -146,12 +146,12 @@
             <div class="w-12 h-12 rounded-full bg-slate-800 text-slate-500 flex items-center justify-center mx-auto text-xl">
                 <i class="fa-solid fa-box-open"></i>
             </div>
-            <h3 class="text-sm font-semibold text-slate-200">Nenhuma peça cadastrada</h3>
-            <p class="text-xs text-slate-500 max-w-sm mx-auto">Cadastre itens em seu estoque para controlar custos, quantidades e inserção em ordens de serviço.</p>
+            <h3 class="text-sm font-semibold text-slate-200">Nenhuma peça registada</h3>
+            <p class="text-xs text-slate-500 max-w-sm mx-auto">Registe itens no seu stock para controlar custos, quantidades e inserção em ordens de serviço.</p>
             <div class="pt-2">
                 <a href="{{ url_for('pecas.nova') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold rounded-xl transition-all">
                     <i class="fa-solid fa-plus"></i>
-                    <span>Cadastrar Peça</span>
+                    <span>Registar Peça</span>
                 </a>
             </div>
         </div>
