@@ -137,98 +137,22 @@
 
     <!-- Seção de Acompanhamento do Sistema e Roadmap -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Coluna Esquerda: Status do Desenvolvimento e Próximos Passos -->
-        <div class="lg:col-span-2 glass-panel p-6 rounded-2xl border border-slate-800 space-y-6">
-            <div class="flex items-center justify-between border-b border-slate-800 pb-4">
-                <div>
-                    <h2 class="text-base font-bold text-white">Progresso de Implementação do Sistema</h2>
-                    <p class="text-xs text-slate-400">Módulos arquitetados e prontos para as próximas fases</p>
+                <!-- Módulo de Gráficos (Chart.js) -->
+        <div class="lg:col-span-2 space-y-6">
+            <div class="glass-panel p-6 rounded-2xl border border-slate-800">
+                <h2 class="text-base font-bold text-white mb-4">Facturação - Últimos 6 Meses</h2>
+                <div class="h-64 relative w-full">
+                    <canvas id="graficoFaturacao"></canvas>
                 </div>
-                <span class="text-xs font-bold text-brand-400 bg-brand-500/10 px-2.5 py-1 rounded-lg border border-brand-500/20">Fase 4 Concluída / PT-PT Ativo</span>
             </div>
 
-            <div class="space-y-4">
-                <!-- Fase 1 -->
-                <div class="flex items-start gap-4 p-4 rounded-xl bg-emerald-950/30 border border-emerald-500/20">
-                    <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 mt-0.5">
-                        <i class="fa-solid fa-check text-sm font-bold"></i>
-                    </div>
-                    <div class="flex-1">
-                        <div class="flex items-center justify-between">
-                            <h3 class="text-sm font-bold text-emerald-200">Fase 1: Fundação Multi-tenant & Autenticação</h3>
-                            <span class="text-[10px] uppercase font-bold text-emerald-400 tracking-wider">Ativo</span>
-                        </div>
-                        <p class="text-xs text-slate-300 mt-1">
-                            Isolamento por empresa (tenant), cadastro de oficina, login com hash PBKDF2/SHA256, sessões seguras e painel inicial responsivo.
-                        </p>
-                    </div>
-                </div>
-
-                <!-- Fase 2 -->
-                <div class="flex items-start gap-4 p-4 rounded-xl bg-emerald-950/30 border border-emerald-500/20">
-                    <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 mt-0.5">
-                        <i class="fa-solid fa-check text-sm font-bold"></i>
-                    </div>
-                    <div class="flex-1">
-                        <div class="flex items-center justify-between">
-                            <h3 class="text-sm font-bold text-slate-200">Fase 2: Gestão de Clientes & Viaturas</h3>
-                            <span class="text-[10px] uppercase font-bold text-emerald-400 tracking-wider">Ativo</span>
-                        </div>
-                        <p class="text-xs text-slate-400 mt-1">
-                            CRUD completo com validação de CPF/CNPJ, máscara de placa Mercosul, busca rápida por telefone/placa e associação 1:N entre cliente e veículos.
-                        </p>
-                    </div>
-                </div>
-
-                <!-- Fase 3 -->
-                <div class="flex items-start gap-4 p-4 rounded-xl bg-emerald-950/30 border border-emerald-500/20">
-                    <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 mt-0.5">
-                        <i class="fa-solid fa-check text-sm font-bold"></i>
-                    </div>
-                    <div class="flex-1">
-                        <div class="flex items-center justify-between">
-                            <h3 class="text-sm font-bold text-emerald-200">Fase 3: Motor de Ordens de Serviço (OS)</h3>
-                            <span class="text-[10px] uppercase font-bold text-emerald-400 tracking-wider">Ativo</span>
-                        </div>
-                        <p class="text-xs text-slate-400 mt-1">
-                            Máquina de estados da OS (Orçamento ➔ Aprovado ➔ Em Andamento ➔ Concluído), checklists de entrada com fotos/avarias e cálculo de totais.
-                        </p>
-                    </div>
-                </div>
-                <!-- Fase 4 -->
-                <div class="flex items-start gap-4 p-4 rounded-xl bg-emerald-950/30 border border-emerald-500/20">
-                    <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 mt-0.5">
-                        <i class="fa-solid fa-check text-sm font-bold"></i>
-                    </div>
-                    <div class="flex-1">
-                        <div class="flex items-center justify-between">
-                            <h3 class="text-sm font-bold text-emerald-200">Fase 4: Exportação & Comunicação (PDF/Email)</h3>
-                            <span class="text-[10px] uppercase font-bold text-emerald-400 tracking-wider">Ativo</span>
-                        </div>
-                        <p class="text-xs text-slate-300 mt-1">
-                            Geração de PDF (xhtml2pdf), notificações WhatsApp, e envio de orçamentos por E-mail (Flask-Mail). Módulo totalmente adaptado para PT-PT (€).
-                        </p>
-                    </div>
-                </div>
-
-                <!-- Fase 5 -->
-                <div class="flex items-start gap-4 p-4 rounded-xl bg-slate-900/60 border border-slate-800/80">
-                    <div class="w-8 h-8 rounded-lg bg-slate-800 text-brand-400 flex items-center justify-center shrink-0 mt-0.5">
-                        <span class="text-xs font-bold">05</span>
-                    </div>
-                    <div class="flex-1">
-                        <div class="flex items-center justify-between">
-                            <h3 class="text-sm font-bold text-slate-200">Fase 5: Métricas & Backup (Próxima)</h3>
-                            <span class="text-[10px] uppercase font-bold text-brand-400 tracking-wider">Próximo Passo</span>
-                        </div>
-                        <p class="text-xs text-slate-400 mt-1">
-                            Aprofundamento deste dashboard com gráficos (Chart.js), rotinas cron de backup e personalização de relatórios.
-                        </p>
-                    </div>
+            <div class="glass-panel p-6 rounded-2xl border border-slate-800">
+                <h2 class="text-base font-bold text-white mb-4">Estado das Ordens de Serviço</h2>
+                <div class="h-64 relative w-full flex justify-center">
+                    <canvas id="graficoOsStatus"></canvas>
                 </div>
             </div>
         </div>
-
         <!-- Coluna Direita: Dados da Oficina & Configurações Rápidas -->
         <div class="glass-panel p-6 rounded-2xl border border-slate-800 space-y-6">
             <div class="border-b border-slate-800 pb-4">
@@ -301,4 +225,7 @@
         </div>
     </div>
 </div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 {% endblock %}

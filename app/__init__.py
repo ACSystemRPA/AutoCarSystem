@@ -1,6 +1,6 @@
 from flask import Flask
 from config import Config
-from app.extensions import db, migrate, login_manager, mail
+from app.extensions import db, migrate, login_manager, mail, scheduler
 from app import models
 
 
@@ -16,6 +16,22 @@ def create_app(config_class=Config):
     migrate.init_app(app, db)
     login_manager.init_app(app)
     mail.init_app(app)
+    scheduler.init_app(app)
+    scheduler.start()
+    
+    # Registar cron-job do backup automático para ser executado todos os dias às 03:00h
+    with app.app_context():
+        from app.tasks import realizar_backup
+        
+        # O ID deve ser único
+        if not scheduler.get_job('backup_diario'):
+            scheduler.add_job(
+                id='backup_diario',
+                func=realizar_backup,
+                trigger='cron',
+                hour=3, 
+                minute=0
+            )
 
     login_manager.login_view = 'auth.login'
     login_manager.login_message = 'Por favor, inicie sessão para aceder ao sistema.'

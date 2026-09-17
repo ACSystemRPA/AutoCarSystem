@@ -9,6 +9,9 @@ class Config:
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
         'sqlite:///' + os.path.join(basedir, 'autocarsystem.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    
+    # Scheduler API para backup automático
+    SCHEDULER_API_ENABLED = True
 
     MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
     MAIL_PORT = int(os.environ.get('MAIL_PORT', 587))
